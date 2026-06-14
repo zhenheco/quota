@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: closed
 Type: AFK
 
 # 05 — Clients + Company API
