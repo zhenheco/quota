@@ -3,7 +3,7 @@
   "compilerOptions": {
     "moduleResolution": "bundler",
     "strict": true,
-    "types": ["@cloudflare/vitest-pool-workers/types"]
+    "types": ["@cloudflare/workers-types", "@cloudflare/vitest-pool-workers/types"]
   },
   "include": [".astro/types.d.ts", "**/*"],
   "exclude": ["dist"]
