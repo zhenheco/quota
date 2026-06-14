@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createApiClient } from '../src/api-client';
+import { createQuotaTools } from '../src/tools';
 
 describe('api client', () => {
   afterEach(() => {
@@ -59,5 +60,129 @@ describe('api client', () => {
         items: [{ name: 'Strategy', qty: 1, unit_price: 1000 }],
       })
     ).rejects.toThrow('Quota API request failed with status 401: Unauthorized');
+  });
+});
+
+describe('create_quote tool', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('uses company default tax rate and matches an existing client by exact name', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json({
+          company: {
+            id: 1,
+            name: 'Quota Co',
+            address: null,
+            phone: null,
+            bank_info: null,
+            default_tax_rate: 0.05,
+            default_notes: 'Default transfer note',
+            logo_key: null,
+            stamp_key: null,
+            bank_image_key: null,
+          },
+        })
+      )
+      .mockResolvedValueOnce(
+        Response.json({
+          clients: [
+            {
+              id: 7,
+              name: 'Acme',
+              contact: 'Amy',
+              phone: '0912-345-678',
+              email: null,
+              address: null,
+            },
+          ],
+        })
+      )
+      .mockResolvedValueOnce(
+        Response.json({
+          id: 12,
+          quote_no: '20260614-01',
+          view_url: '/q/12',
+          xlsx_url: '/api/quotes/12/xlsx',
+        })
+      );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const api = createApiClient({ baseUrl: 'https://quota.example.workers.dev', token: 'machine-token' });
+    const result = await createQuotaTools(api).create_quote.handler({
+      client: 'Acme',
+      subject: 'Strategy',
+      quote_date: '2026-06-14',
+      items: [{ name: 'Planning', qty: 2, unit: 'hr', unit_price: 1000 }],
+    });
+
+    expect(JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body))).toMatchObject({
+      client_id: 7,
+      client_name: 'Acme',
+      client_contact: 'Amy',
+      client_phone: '0912-345-678',
+      subject: 'Strategy',
+      quote_date: '2026-06-14',
+      tax_rate: 0.05,
+      notes: 'Default transfer note',
+      created_via: 'chat',
+      items: [{ name: 'Planning', qty: 2, unit: 'hr', unit_price: 1000 }],
+    });
+    expect(result.content[0]?.text).toContain('20260614-01');
+    expect(result.content[0]?.text).toContain('https://quota.example.workers.dev/q/12');
+    expect(result.content[0]?.text).toContain('https://quota.example.workers.dev/api/quotes/12/xlsx');
+  });
+
+  it('sends a client snapshot without client_id when no existing client matches', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json({
+          company: {
+            id: 1,
+            name: 'Quota Co',
+            address: null,
+            phone: null,
+            bank_info: null,
+            default_tax_rate: 0.05,
+            default_notes: null,
+            logo_key: null,
+            stamp_key: null,
+            bank_image_key: null,
+          },
+        })
+      )
+      .mockResolvedValueOnce(Response.json({ clients: [{ id: 7, name: 'Acme', contact: null, phone: null }] }))
+      .mockResolvedValueOnce(
+        Response.json({
+          id: 13,
+          quote_no: '20260614-02',
+          view_url: 'https://quota.example.workers.dev/q/13',
+          xlsx_url: 'https://quota.example.workers.dev/api/quotes/13/xlsx',
+        })
+      );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const api = createApiClient({ baseUrl: 'https://quota.example.workers.dev', token: 'machine-token' });
+    await createQuotaTools(api).create_quote.handler({
+      client: 'New Co',
+      subject: 'Website',
+      quote_date: '2026-06-14',
+      tax_rate: 0.08,
+      notes: 'Custom note',
+      items: [{ name: 'Build', qty: 1, unit_price: 5000 }],
+    });
+
+    const body = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
+    expect(body).toMatchObject({
+      client_name: 'New Co',
+      subject: 'Website',
+      tax_rate: 0.08,
+      notes: 'Custom note',
+    });
+    expect(body).not.toHaveProperty('client_id');
   });
 });
