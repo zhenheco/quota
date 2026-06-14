@@ -9,22 +9,28 @@ export const GET: APIRoute = async ({ locals, params }) => {
     return new Response('Quote not found.', { status: 404 });
   }
 
-  const download = await getQuoteXlsx(runtimeEnv(locals), id);
+  try {
+    const download = await getQuoteXlsx(runtimeEnv(locals), id);
 
-  if (download === null) {
-    return new Response('Quote xlsx not found.', { status: 404 });
+    if (download === null) {
+      return new Response('Quote xlsx not found.', { status: 404 });
+    }
+
+    const body = download.bytes.buffer.slice(
+      download.bytes.byteOffset,
+      download.bytes.byteOffset + download.bytes.byteLength
+    ) as ArrayBuffer;
+
+    return new Response(body, {
+      status: 200,
+      headers: {
+        'Content-Type': XLSX_CONTENT_TYPE,
+        'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(download.filename)}`,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+
+    return new Response('Unable to download quote xlsx.', { status: 500 });
   }
-
-  const body = download.bytes.buffer.slice(
-    download.bytes.byteOffset,
-    download.bytes.byteOffset + download.bytes.byteLength
-  ) as ArrayBuffer;
-
-  return new Response(body, {
-    status: 200,
-    headers: {
-      'Content-Type': XLSX_CONTENT_TYPE,
-      'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(download.filename)}`,
-    },
-  });
 };

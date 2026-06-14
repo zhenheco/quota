@@ -4,6 +4,8 @@ import { DELETE as deleteQuote, GET as getQuote, PUT as updateQuote } from '../s
 import { POST as regenerateXlsx } from '../src/pages/api/quotes/[id]/regenerate';
 import { GET as downloadXlsx } from '../src/pages/api/quotes/[id]/xlsx';
 import { GET as listQuotes, POST as createQuote } from '../src/pages/api/quotes/index';
+import { GET as publicAsset } from '../src/pages/q/[id]/asset';
+import { GET as publicDownloadXlsx } from '../src/pages/q/[id]/download';
 import { authHeaders, context, json } from './helpers';
 
 async function resetDb(): Promise<void> {
@@ -195,6 +197,36 @@ describe('quotes API routes', () => {
     );
     expect(response.headers.get('Content-Disposition')).toContain('.xlsx');
     expect(bytes.byteLength).toBeGreaterThan(0);
+  });
+
+  it('returns a clean 500 response when public xlsx download storage read fails', async () => {
+    const created = await createValidQuote();
+    const id = String(created.id);
+    const routeContext = context(`/q/${id}/download`, {}, { id });
+
+    routeContext.locals.runtime.env.FILES = {
+      get: async () => {
+        throw new Error('R2 unavailable');
+      },
+    } as unknown as R2Bucket;
+
+    const response = await publicDownloadXlsx(routeContext);
+
+    expect(response.status).toBe(500);
+    expect(response.headers.get('Content-Type')).toContain('text/plain');
+    await expect(response.text()).resolves.toBe('Unable to download quote xlsx.');
+  });
+
+  it('does not serve public brand assets for a missing quote id', async () => {
+    await env.DB.prepare("UPDATE company_profile SET logo_key = 'brand/logo.png' WHERE id = 1").run();
+    await env.FILES.put('brand/logo.png', new Uint8Array([1, 2, 3]), {
+      httpMetadata: { contentType: 'image/png' },
+    });
+
+    const response = await publicAsset(context('/q/999/asset?type=logo', {}, { id: '999' }));
+
+    expect(response.status).toBe(404);
+    await expect(response.text()).resolves.toBe('Asset not found.');
   });
 
   it('regenerates quote xlsx', async () => {
