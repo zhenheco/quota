@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import { putBrandAsset } from '../../server/brand';
 import { getCompany, updateCompany } from '../../server/company-service';
 import { runtimeEnv } from '../../server/runtime-env';
+import { createSettingsView } from '../../server/settings-view';
 import { companyPatchFromForm } from '../../server/ui-forms';
 
 const env = runtimeEnv(Astro.locals);
@@ -40,6 +41,8 @@ if (Astro.request.method === 'POST') {
     error = '無法儲存設定。';
   }
 }
+
+const settingsView = createSettingsView(company);
 ---
 
 <Base title="設定 | Quota">
@@ -52,6 +55,18 @@ if (Astro.request.method === 'POST') {
     </header>
 
     {error && <p class="status-pill">{error}</p>}
+
+    {settingsView.showFirstRunSetup && (
+      <section class="panel setup-guide" aria-labelledby="setup-guide-title">
+        <div>
+          <p class="eyebrow">FIRST RUN</p>
+          <h2 id="setup-guide-title">首次設定</h2>
+        </div>
+        <ol>
+          {settingsView.setupSteps.map((step) => <li>{step}</li>)}
+        </ol>
+      </section>
+    )}
 
     <form class="panel form-grid" method="POST" enctype="multipart/form-data">
       <div class="field">

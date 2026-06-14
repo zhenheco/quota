@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createQuoteDocumentView } from '../src/server/quote-document-view';
+import { createSettingsView } from '../src/server/settings-view';
 import type { Company, Quote } from '../src/server/types';
 
 const company: Company = {
@@ -64,5 +65,32 @@ describe('QuoteDocument', () => {
       }),
     ]);
     expect(view.totalLabel).toBe('100,800');
+  });
+});
+
+describe('settings view', () => {
+  it('shows first-run setup guidance when company identity and brand assets are blank', () => {
+    const view = createSettingsView({
+      ...company,
+      name: ' ',
+      logo_key: null,
+      stamp_key: null,
+      bank_image_key: null,
+    });
+
+    expect(view.showFirstRunSetup).toBe(true);
+    expect(view.setupSteps).toEqual(['填公司資料', '上傳品牌圖檔', '設定稅率與備註']);
+  });
+
+  it('hides first-run setup guidance after company identity is configured', () => {
+    const view = createSettingsView({
+      ...company,
+      name: 'Acme Studio',
+      logo_key: null,
+      stamp_key: null,
+      bank_image_key: null,
+    });
+
+    expect(view.showFirstRunSetup).toBe(false);
   });
 });
