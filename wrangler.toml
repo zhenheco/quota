@@ -1,7 +1,11 @@
 name = "quota"
-main = "@astrojs/cloudflare/entrypoints/server"
+main = "./src/worker.ts"
 compatibility_date = "2026-06-12"
 compatibility_flags = ["nodejs_compat"]
+
+[assets]
+binding = "ASSETS"
+directory = "./dist"
 
 [[d1_databases]]
 binding = "DB"
