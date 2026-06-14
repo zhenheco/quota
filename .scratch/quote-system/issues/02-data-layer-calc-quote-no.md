@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: closed
 Type: AFK
 
 # 02 — 資料層 + 計算 + 報價單號
