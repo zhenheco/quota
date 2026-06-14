@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { clientsRepo, quotesRepo } from '../src/server/db';
 import { DELETE as deleteClient, GET as getClient, PUT as updateClient } from '../src/pages/api/clients/[id]';
 import { GET as listClients, POST as createClient } from '../src/pages/api/clients/index';
+import { GET as getCompany, PUT as updateCompany } from '../src/pages/api/company/index';
 import { authHeaders, context, json } from './helpers';
 
 async function resetDb(): Promise<void> {
@@ -150,6 +151,86 @@ describe('clients API routes', () => {
       client_name: '安可整合行銷',
       client_contact: '王小姐',
       client_phone: '0912-345-678',
+    });
+  });
+});
+
+describe('company API route', () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  it('rejects GET /api/company without a token', async () => {
+    const response = await getCompany(context('/api/company'));
+
+    expect(response.status).toBe(401);
+  });
+
+  it('reads the seeded single company profile with blank factory values', async () => {
+    const response = await getCompany(context('/api/company', { headers: authHeaders() }));
+    const body = await json(response);
+
+    expect(response.status).toBe(200);
+    expect(body.company).toMatchObject({
+      id: 1,
+      name: '',
+      address: '',
+      phone: '',
+      bank_info: '',
+      default_tax_rate: 0.05,
+      default_notes: '',
+      logo_key: null,
+      stamp_key: null,
+      bank_image_key: null,
+    });
+  });
+
+  it('updates a partial company patch and preserves omitted fields', async () => {
+    const updateResponse = await updateCompany(
+      context('/api/company', {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ name: '範例客戶', bank_info: '玉山銀行 808 / 1234' }),
+      })
+    );
+    const updateBody = await json(updateResponse);
+
+    expect(updateResponse.status).toBe(200);
+    expect(updateBody.company).toMatchObject({
+      name: '範例客戶',
+      address: '',
+      phone: '',
+      bank_info: '玉山銀行 808 / 1234',
+      default_tax_rate: 0.05,
+      default_notes: '',
+    });
+
+    const readResponse = await getCompany(context('/api/company', { headers: authHeaders() }));
+    const readBody = await json(readResponse);
+
+    expect(readResponse.status).toBe(200);
+    expect(readBody.company).toMatchObject(updateBody.company as Record<string, unknown>);
+  });
+
+  it('updates company brand asset keys', async () => {
+    const updateResponse = await updateCompany(
+      context('/api/company', {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          logo_key: 'brand/logo.png',
+          stamp_key: 'brand/stamp.png',
+          bank_image_key: 'brand/bank.jpg',
+        }),
+      })
+    );
+    const updateBody = await json(updateResponse);
+
+    expect(updateResponse.status).toBe(200);
+    expect(updateBody.company).toMatchObject({
+      logo_key: 'brand/logo.png',
+      stamp_key: 'brand/stamp.png',
+      bank_image_key: 'brand/bank.jpg',
     });
   });
 });
