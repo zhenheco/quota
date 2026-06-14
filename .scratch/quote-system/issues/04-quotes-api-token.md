@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: closed
 Type: AFK
 
 # 04 — Quotes API + 機器 token
