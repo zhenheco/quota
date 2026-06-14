@@ -1,5 +1,7 @@
 name = "quota"
 # Deploy uses Astro-generated dist/server/wrangler.json; this root config is for local/test bindings.
+# Before production deploy, run `wrangler d1 create quota` and replace database_id with the returned id.
+# Keep binding names stable: DB for D1, FILES for R2.
 compatibility_date = "2026-06-12"
 compatibility_flags = ["nodejs_compat"]
 
@@ -11,7 +13,9 @@ directory = "./dist"
 binding = "DB"
 database_name = "quota-dev"
 database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
 
 [[r2_buckets]]
 binding = "FILES"
+# Before production deploy, run `wrangler r2 bucket create quota-files` and replace this with the real bucket name.
 bucket_name = "quota-files-dev"
