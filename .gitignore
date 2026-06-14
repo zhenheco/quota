@@ -5,3 +5,6 @@ dist/
 .dev.vars
 *.local
 .DS_Store
+
+# 振禾私有真實品牌素材（印章/存摺/客戶報價）— 不進 git
+private/
