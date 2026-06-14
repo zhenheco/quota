@@ -1,5 +1,5 @@
 name = "quota"
-main = "./src/worker.ts"
+# Deploy uses Astro-generated dist/server/wrangler.json; this root config is for local/test bindings.
 compatibility_date = "2026-06-12"
 compatibility_flags = ["nodejs_compat"]
 
