@@ -3,6 +3,8 @@ declare namespace Cloudflare {
     DB: D1Database;
     FILES: R2Bucket;
     QUOTA_API_TOKEN?: string;
+    UI_USER?: string;
+    UI_PASSWORD?: string;
     TEST_MIGRATIONS: import('cloudflare:test').D1Migration[];
   }
 }
