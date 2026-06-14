@@ -37,11 +37,23 @@ function makeCompany(): Company {
   };
 }
 
-function makeItems(count: 1 | 2): QuoteItem[] {
-  const rawItems = [
+function makeItems(count: number): QuoteItem[] {
+  const baseItems = [
     { name: '策略規劃', description: '品牌與行銷策略', qty: 1, unit: '式', unit_price: 48000 },
     { name: '廣告素材', description: '社群圖文與投放素材', qty: 2, unit: '組', unit_price: 12500 },
-  ].slice(0, count);
+  ];
+
+  const rawItems = Array.from({ length: count }, (_, index) => {
+    return (
+      baseItems[index] ?? {
+        name: `延伸服務 ${index + 1}`,
+        description: `第 ${index + 1} 項服務說明`,
+        qty: index + 1,
+        unit: '項',
+        unit_price: 1000 + index * 100,
+      }
+    );
+  });
 
   return rawItems.map((item, index) => ({
     ...item,
@@ -180,6 +192,41 @@ describe('generateQuoteXlsx', () => {
     const worksheet = await loadQuoteWorksheet(makeItems(1));
 
     expect(getItemRows(worksheet)).toHaveLength(1);
+  });
+
+  it('places totals and footer after all item rows when the quote has twelve items', async () => {
+    const worksheet = await loadQuoteWorksheet(makeItems(12));
+    const itemRows = getItemRows(worksheet);
+    const lastItemRowNumber = itemRows[itemRows.length - 1].number;
+    const subtotalRowNumber = findRowNumberByValue(worksheet, '小計');
+    const footerRowNumber = findRowNumberByValue(worksheet, '備註');
+    const bankInfoRowNumber = findRowNumberByValue(worksheet, '匯款資訊');
+
+    expect(itemRows).toHaveLength(12);
+    expect(subtotalRowNumber).toBe(lastItemRowNumber + 1);
+    expect(footerRowNumber).toBe(subtotalRowNumber + 5);
+    expect(bankInfoRowNumber).toBeGreaterThan(footerRowNumber);
+  });
+
+  it('skips null brand images without throwing and produces a workbook without images', async () => {
+    const items = makeItems(1);
+    const bytes = await generateQuoteXlsx({
+      quote: makeQuote(items),
+      items,
+      company: makeCompany(),
+      brand: {
+        logo: null,
+        stamp: null,
+        bank: null,
+      },
+    });
+
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(bytes as unknown as XlsxLoadBuffer);
+
+    const worksheet = workbook.getWorksheet('報價單');
+    expect(worksheet).toBeDefined();
+    expect((worksheet as ExcelJS.Worksheet).getImages()).toHaveLength(0);
   });
 
   it('rejects quotes without items with a clear error', async () => {

@@ -8,9 +8,9 @@ const WHITE = 'FFFFFFFF';
 const MONEY_FORMAT = '#,##0';
 
 export interface QuoteXlsxBrand {
-  logo?: ArrayBuffer;
-  stamp?: ArrayBuffer;
-  bank?: ArrayBuffer;
+  logo?: ArrayBuffer | null;
+  stamp?: ArrayBuffer | null;
+  bank?: ArrayBuffer | null;
 }
 
 export interface QuoteXlsxInput {
@@ -49,12 +49,12 @@ export async function generateQuoteXlsx(input: QuoteXlsxInput): Promise<Uint8Arr
     views: [{ showGridLines: false }],
   });
 
-  configureColumns(worksheet);
   buildHeader(worksheet, input);
   const tableStartRow = buildItemsTable(worksheet, input.items);
   const totalsStartRow = tableStartRow + input.items.length + 1;
   buildTotals(worksheet, input.quote, totalsStartRow);
   const footerStartRow = totalsStartRow + 5;
+  configureColumns(worksheet, footerStartRow + 9);
   buildFooter(worksheet, input, footerStartRow);
   addBrandImages(workbook, worksheet, input.brand, footerStartRow);
 
@@ -77,7 +77,7 @@ function validateInput(input: QuoteXlsxInput): void {
   }
 }
 
-function configureColumns(worksheet: ExcelJS.Worksheet): void {
+function configureColumns(worksheet: ExcelJS.Worksheet, defaultRowCount: number): void {
   worksheet.columns = [
     { key: 'index', width: 8 },
     { key: 'name', width: 20 },
@@ -88,7 +88,7 @@ function configureColumns(worksheet: ExcelJS.Worksheet): void {
     { key: 'amount', width: 15 },
   ];
 
-  for (let rowNumber = 1; rowNumber <= 45; rowNumber += 1) {
+  for (let rowNumber = 1; rowNumber <= defaultRowCount; rowNumber += 1) {
     worksheet.getRow(rowNumber).height = 22;
   }
 }
@@ -259,11 +259,11 @@ function addBrandImages(
 function addImage(
   workbook: ExcelJS.Workbook,
   worksheet: ExcelJS.Worksheet,
-  bytes: ArrayBuffer | undefined,
+  bytes: ArrayBuffer | null | undefined,
   extension: ImageExtension,
   position: ExcelJS.ImagePosition
 ): void {
-  if (bytes === undefined) {
+  if (!bytes || bytes.byteLength === 0) {
     return;
   }
 
