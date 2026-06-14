@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: closed
 Type: HITL
 
 # 01 — Scaffold + ExcelJS-on-Workers spike
