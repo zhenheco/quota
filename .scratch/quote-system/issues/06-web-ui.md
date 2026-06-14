@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: closed
 Type: AFK
 
 # 06 — Web UI（清單 / 編輯器+即時預覽 / 檢視 / 客戶 / 設定）
