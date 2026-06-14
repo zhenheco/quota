@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { requireAuth } from '../../../../server/auth';
 import { putBrandAsset } from '../../../../server/brand';
 import { updateCompany } from '../../../../server/company-service';
+import { runtimeEnv } from '../../../../server/runtime-env';
 import type { CompanyPatch } from '../../../../server/types';
 
 type BrandAsset = 'logo' | 'stamp' | 'bank';
@@ -16,7 +17,7 @@ const ASSET_FIELDS: Record<BrandAsset, keyof CompanyPatch> = {
 };
 
 export const PUT: APIRoute = async ({ request, params, locals }) => {
-  const env = locals.runtime.env;
+  const env = runtimeEnv(locals);
 
   if (!requireAuth(request, env)) {
     return json({ error: 'Unauthorized' }, 401);

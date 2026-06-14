@@ -1,9 +1,10 @@
 import type { APIRoute } from 'astro';
 import { requireAuth } from '../../../server/auth';
 import { createClient, listClients, validateClientInput } from '../../../server/clients-service';
+import { runtimeEnv } from '../../../server/runtime-env';
 
 export const GET: APIRoute = async ({ request, locals }) => {
-  const env = locals.runtime.env;
+  const env = runtimeEnv(locals);
 
   if (!requireAuth(request, env)) {
     return json({ error: 'Unauthorized' }, 401);
@@ -19,7 +20,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
 };
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  const env = locals.runtime.env;
+  const env = runtimeEnv(locals);
 
   if (!requireAuth(request, env)) {
     return json({ error: 'Unauthorized' }, 401);

@@ -1,9 +1,10 @@
 import type { APIRoute } from 'astro';
 import { requireAuth } from '../../../../server/auth';
 import { regenerateXlsx } from '../../../../server/quotes-service';
+import { runtimeEnv } from '../../../../server/runtime-env';
 
 export const POST: APIRoute = async ({ request, params, locals }) => {
-  const env = locals.runtime.env;
+  const env = runtimeEnv(locals);
 
   if (!requireAuth(request, env)) {
     return json({ error: 'Unauthorized' }, 401);
