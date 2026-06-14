@@ -36,6 +36,8 @@ Open `http://127.0.0.1:4321/settings` and fill your own company profile.
 
 ## Cloudflare Setup
 
+For the production deployment checklist, resource creation commands, Cloudflare Access setup, canary, and smoke checks, use [DEPLOY.md](./DEPLOY.md).
+
 Create your own Cloudflare resources:
 
 ```sh
