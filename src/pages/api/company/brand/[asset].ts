@@ -7,6 +7,8 @@ import type { CompanyPatch } from '../../../../server/types';
 type BrandAsset = 'logo' | 'stamp' | 'bank';
 type ImageExtension = 'png' | 'jpg';
 
+const MAX_BRAND_BYTES = 5 * 1024 * 1024;
+
 const ASSET_FIELDS: Record<BrandAsset, keyof CompanyPatch> = {
   logo: 'logo_key',
   stamp: 'stamp_key',
@@ -32,8 +34,18 @@ export const PUT: APIRoute = async ({ request, params, locals }) => {
     return json({ error: 'Brand asset must be image/png or image/jpeg.' }, 400);
   }
 
+  const contentLength = request.headers.get('content-length');
+
+  if (contentLength !== null && Number(contentLength) > MAX_BRAND_BYTES) {
+    return brandAssetTooLarge();
+  }
+
   try {
     const bytes = await request.arrayBuffer();
+
+    if (bytes.byteLength > MAX_BRAND_BYTES) {
+      return brandAssetTooLarge();
+    }
 
     if (bytes.byteLength === 0) {
       return json({ error: 'Brand asset body is empty.' }, 400);
@@ -78,4 +90,8 @@ function imageExtension(contentType: string | null): ImageExtension | null {
 
 function json(body: unknown, status: number): Response {
   return Response.json(body, { status });
+}
+
+function brandAssetTooLarge(): Response {
+  return json({ error: 'Brand asset exceeds 5MB.' }, 413);
 }

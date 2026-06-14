@@ -63,6 +63,26 @@ describe('company brand upload API route', () => {
     expect(company.logo_key).toBe('brand/logo.png');
   });
 
+  it('rejects brand uploads when Content-Length is over 5MB', async () => {
+    const response = await uploadBrandAsset(
+      context(
+        '/api/company/brand/logo',
+        {
+          method: 'PUT',
+          headers: {
+            ...authHeaders(),
+            'content-type': 'image/png',
+            'content-length': String(5 * 1024 * 1024 + 1),
+          },
+          body: new Uint8Array([1, 2, 3]),
+        },
+        { asset: 'logo' }
+      )
+    );
+
+    expect(response.status).toBe(413);
+  });
+
   it('rejects assets outside the allowlist', async () => {
     const response = await uploadBrandAsset(
       context(
