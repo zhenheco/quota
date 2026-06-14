@@ -29,8 +29,17 @@ export async function listQuotes(env: QuotesEnv, filter: QuoteListFilter = {}): 
 
 export async function createQuote(env: QuotesEnv, input: ValidQuoteInput): Promise<QuoteSummary> {
   const { items, ...quoteInput } = input;
-  const quote = await quotesRepo(env.DB).create(quoteInput, items);
-  const updated = await writeQuoteXlsx(env, quote);
+  const repo = quotesRepo(env.DB);
+  const quote = await repo.create(quoteInput, items);
+  let updated: Quote;
+
+  try {
+    updated = await writeQuoteXlsx(env, quote);
+  } catch (error) {
+    await env.FILES.delete(quoteXlsxKey(quote));
+    await repo.delete(quote.id);
+    throw error;
+  }
 
   return quoteSummary(updated);
 }

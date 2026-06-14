@@ -24,7 +24,19 @@ describe('requireAuth', () => {
     expect(requireAuth(request({ Authorization: 'Bearer test-token' }), env)).toBe(true);
   });
 
-  it('accepts requests that already passed Cloudflare Access', () => {
-    expect(requireAuth(request({ 'Cf-Access-Jwt-Assertion': 'jwt' }), env)).toBe(true);
+  it('rejects requests with only the Cloudflare Access assertion header', () => {
+    expect(requireAuth(request({ 'Cf-Access-Jwt-Assertion': 'jwt' }), env)).toBe(false);
+  });
+
+  it('accepts requests with the configured bearer token when the Cloudflare Access assertion header is present', () => {
+    expect(
+      requireAuth(
+        request({
+          Authorization: 'Bearer test-token',
+          'Cf-Access-Jwt-Assertion': 'jwt',
+        }),
+        env
+      )
+    ).toBe(true);
   });
 });

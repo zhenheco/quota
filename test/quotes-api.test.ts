@@ -130,6 +130,27 @@ describe('quotes API routes', () => {
     expect(row?.xlsx_key).toBe(key);
   });
 
+  it('does not leave a quote row when xlsx generation fails during creation', async () => {
+    await env.DB.prepare("UPDATE company_profile SET name = '' WHERE id = 1").run();
+
+    const response = await createQuote(
+      context('/api/quotes', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(quotePayload()),
+      })
+    );
+    const quoteCount = await env.DB.prepare('SELECT COUNT(*) AS count FROM quotes').first<{ count: number }>();
+    const itemCount = await env.DB.prepare('SELECT COUNT(*) AS count FROM quote_items').first<{ count: number }>();
+    const object = await env.FILES.get('quotes/20260614-01/20260614-01.xlsx');
+
+    expect(response.status).toBe(500);
+    await expect(response.text()).resolves.toContain('Unable to create quote.');
+    expect(quoteCount?.count).toBe(0);
+    expect(itemCount?.count).toBe(0);
+    expect(object).toBeNull();
+  });
+
   it('lists quotes and filters by status', async () => {
     const created = await createValidQuote();
 
