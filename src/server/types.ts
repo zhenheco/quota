@@ -65,6 +65,14 @@ export interface QuoteCreateInput {
   pdf_key?: string | null;
 }
 
+export type QuoteUpdateInput = QuoteCreateInput;
+
+export interface QuoteListFilter {
+  client?: string;
+  status?: QuoteStatus;
+  date?: string;
+}
+
 export interface QuoteItem extends QuoteItemInput {
   id: number;
   quote_id: number;

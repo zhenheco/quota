@@ -1,0 +1,254 @@
+import type { APIContext } from 'astro';
+import { env } from 'cloudflare:test';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { DELETE as deleteQuote, GET as getQuote, PUT as updateQuote } from '../src/pages/api/quotes/[id]';
+import { POST as regenerateXlsx } from '../src/pages/api/quotes/[id]/regenerate';
+import { GET as downloadXlsx } from '../src/pages/api/quotes/[id]/xlsx';
+import { GET as listQuotes, POST as createQuote } from '../src/pages/api/quotes/index';
+
+const TOKEN = 'test-token';
+
+type MockApiContext = APIContext<Record<string, unknown>, Record<string, string | undefined>>;
+
+async function resetDb(): Promise<void> {
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM quote_items'),
+    env.DB.prepare('DELETE FROM quotes'),
+    env.DB.prepare('DELETE FROM clients'),
+    env.DB.prepare(
+      `UPDATE company_profile
+       SET name = '範例客戶', address = '台北市中山區南京東路一段 1 號',
+           phone = '02-1234-5678',
+           bank_info = '玉山銀行 808 / 1234-567-890123 / 範例客戶有限公司',
+           default_tax_rate = 0.05, default_notes = '匯款後請提供末五碼。',
+           logo_key = NULL, stamp_key = NULL, bank_image_key = NULL
+       WHERE id = 1`
+    ),
+  ]);
+}
+
+function testEnv(): Cloudflare.Env {
+  return {
+    DB: env.DB,
+    FILES: env.FILES,
+    TEST_MIGRATIONS: env.TEST_MIGRATIONS,
+    QUOTA_API_TOKEN: TOKEN,
+  };
+}
+
+function context(
+  path: string,
+  init: RequestInit = {},
+  params: Record<string, string> = {}
+): MockApiContext {
+  const request = new Request(`https://quota.test${path}`, init);
+
+  return {
+    request,
+    params,
+    locals: {
+      runtime: {
+        env: testEnv(),
+      },
+    },
+    url: new URL(request.url),
+  } as unknown as MockApiContext;
+}
+
+function authHeaders(): HeadersInit {
+  return {
+    Authorization: `Bearer ${TOKEN}`,
+  };
+}
+
+function quotePayload(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    client_name: '安可整合行銷',
+    client_contact: '王小姐',
+    client_phone: '0912-345-678',
+    subject: '行銷',
+    quote_date: '2026-06-14',
+    valid_until: '2026-06-30',
+    tax_rate: 0.05,
+    notes: '本報價含稅，實際執行細節依雙方確認為準。',
+    items: [{ name: '策略規劃', description: '品牌與行銷策略', qty: 2, unit: '式', unit_price: 48000 }],
+    ...overrides,
+  };
+}
+
+async function json(response: Response): Promise<Record<string, unknown>> {
+  return (await response.json()) as Record<string, unknown>;
+}
+
+async function createValidQuote(): Promise<Record<string, unknown>> {
+  const response = await createQuote(
+    context('/api/quotes', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(quotePayload()),
+    })
+  );
+
+  expect(response.status).toBe(201);
+
+  return json(response);
+}
+
+describe('quotes API routes', () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  it('rejects POST /api/quotes without a token', async () => {
+    const response = await createQuote(
+      context('/api/quotes', {
+        method: 'POST',
+        body: JSON.stringify(quotePayload()),
+      })
+    );
+
+    expect(response.status).toBe(401);
+  });
+
+  it('creates a quote, writes xlsx to R2, updates DB xlsx_key, and returns URLs', async () => {
+    const body = await createValidQuote();
+
+    expect(body).toMatchObject({
+      id: expect.any(Number),
+      quote_no: '20260614-01',
+      view_url: `/q/${body.id}`,
+      xlsx_url: `/api/quotes/${body.id}/xlsx`,
+    });
+
+    const key = `quotes/${body.quote_no}/${body.quote_no}.xlsx`;
+    const object = await env.FILES.get(key);
+    const row = await env.DB.prepare('SELECT xlsx_key FROM quotes WHERE id = ?1')
+      .bind(body.id)
+      .first<{ xlsx_key: string | null }>();
+
+    expect(object).not.toBeNull();
+    expect(row?.xlsx_key).toBe(key);
+  });
+
+  it('lists quotes and filters by status', async () => {
+    const created = await createValidQuote();
+
+    const allResponse = await listQuotes(context('/api/quotes', { headers: authHeaders() }));
+    const allBody = await json(allResponse);
+
+    expect(allResponse.status).toBe(200);
+    expect(allBody.quotes).toEqual([
+      expect.objectContaining({
+        id: created.id,
+        quote_no: '20260614-01',
+        status: 'draft',
+      }),
+    ]);
+
+    const filteredResponse = await listQuotes(context('/api/quotes?status=accepted', { headers: authHeaders() }));
+    const filteredBody = await json(filteredResponse);
+
+    expect(filteredResponse.status).toBe(200);
+    expect(filteredBody.quotes).toEqual([]);
+  });
+
+  it('reads, updates totals, deletes, then returns 404 for the deleted quote', async () => {
+    const created = await createValidQuote();
+    const id = String(created.id);
+
+    const readResponse = await getQuote(context(`/api/quotes/${id}`, { headers: authHeaders() }, { id }));
+    const readBody = await json(readResponse);
+
+    expect(readResponse.status).toBe(200);
+    expect(readBody.quote).toMatchObject({
+      id: created.id,
+      subject: '行銷',
+      items: [expect.objectContaining({ name: '策略規劃' })],
+    });
+
+    const updateResponse = await updateQuote(
+      context(
+        `/api/quotes/${id}`,
+        {
+          method: 'PUT',
+          headers: authHeaders(),
+          body: JSON.stringify(
+            quotePayload({
+              subject: '網站改版',
+              items: [{ name: '專案管理', qty: 4, unit: 'hr', unit_price: 2000 }],
+            })
+          ),
+        },
+        { id }
+      )
+    );
+    const updateBody = await json(updateResponse);
+
+    expect(updateResponse.status).toBe(200);
+    expect(updateBody.quote).toMatchObject({
+      subject: '網站改版',
+      subtotal: 8000,
+      tax_amount: 400,
+      total: 8400,
+      items: [expect.objectContaining({ name: '專案管理', amount: 8000 })],
+    });
+
+    const deleteResponse = await deleteQuote(
+      context(`/api/quotes/${id}`, { method: 'DELETE', headers: authHeaders() }, { id })
+    );
+    expect(deleteResponse.status).toBe(204);
+    await expect(env.FILES.get(`quotes/${created.quote_no}/${created.quote_no}.xlsx`)).resolves.toBeNull();
+
+    const missingResponse = await getQuote(context(`/api/quotes/${id}`, { headers: authHeaders() }, { id }));
+    expect(missingResponse.status).toBe(404);
+  });
+
+  it('streams generated xlsx bytes with download headers', async () => {
+    const created = await createValidQuote();
+    const id = String(created.id);
+
+    const response = await downloadXlsx(context(`/api/quotes/${id}/xlsx`, { headers: authHeaders() }, { id }));
+    const bytes = await response.arrayBuffer();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Content-Type')).toBe(
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    expect(response.headers.get('Content-Disposition')).toContain('.xlsx');
+    expect(bytes.byteLength).toBeGreaterThan(0);
+  });
+
+  it('regenerates quote xlsx', async () => {
+    const created = await createValidQuote();
+    const id = String(created.id);
+
+    const response = await regenerateXlsx(
+      context(`/api/quotes/${id}/regenerate`, { method: 'POST', headers: authHeaders() }, { id })
+    );
+    const body = await json(response);
+    const row = await env.DB.prepare('SELECT xlsx_key FROM quotes WHERE id = ?1')
+      .bind(created.id)
+      .first<{ xlsx_key: string | null }>();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      id: created.id,
+      quote_no: '20260614-01',
+      xlsx_url: `/api/quotes/${created.id}/xlsx`,
+    });
+    expect(row?.xlsx_key).toBe('quotes/20260614-01/20260614-01.xlsx');
+  });
+
+  it('returns 400 for invalid payloads', async () => {
+    const response = await createQuote(
+      context('/api/quotes', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(quotePayload({ subject: '' })),
+      })
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.text()).resolves.toContain('subject');
+  });
+});
