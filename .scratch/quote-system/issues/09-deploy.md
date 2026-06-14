@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: ready-for-human
 Type: HITL
 
 # 09 — 部署（wrangler + Access + 種子 + 冒煙）
