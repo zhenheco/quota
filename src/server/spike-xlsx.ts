@@ -1,5 +1,14 @@
-import { Buffer } from 'node:buffer';
 import ExcelJS from 'exceljs';
+
+function encodeBase64(bytes: Uint8Array): string {
+  let binary = '';
+
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+
+  return btoa(binary);
+}
 
 export async function buildSpikeXlsx(pngBytes: Uint8Array): Promise<Uint8Array> {
   const workbook = new ExcelJS.Workbook();
@@ -9,7 +18,7 @@ export async function buildSpikeXlsx(pngBytes: Uint8Array): Promise<Uint8Array> 
   worksheet.getCell('A2').value = 'ExcelJS on Cloudflare Workers';
 
   const imageId = workbook.addImage({
-    buffer: Buffer.from(pngBytes),
+    base64: `data:image/png;base64,${encodeBase64(pngBytes)}`,
     extension: 'png',
   });
 
@@ -20,5 +29,5 @@ export async function buildSpikeXlsx(pngBytes: Uint8Array): Promise<Uint8Array> 
 
   const buffer = await workbook.xlsx.writeBuffer();
 
-  return buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  return new Uint8Array(buffer as unknown as ArrayBufferLike);
 }

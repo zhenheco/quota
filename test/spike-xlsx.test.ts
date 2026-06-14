@@ -2,6 +2,8 @@ import ExcelJS from 'exceljs';
 import { describe, expect, it } from 'vitest';
 import { buildSpikeXlsx } from '../src/server/spike-xlsx';
 
+type XlsxLoadBuffer = Parameters<ExcelJS.Workbook['xlsx']['load']>[0];
+
 const onePixelPngBase64 =
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=';
 
@@ -25,7 +27,7 @@ describe('xlsx spike', () => {
     expect(xlsx.byteLength).toBeGreaterThan(0);
 
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(xlsx);
+    await workbook.xlsx.load(xlsx as unknown as XlsxLoadBuffer);
 
     const worksheet = workbook.getWorksheet('Spike');
 
