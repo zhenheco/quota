@@ -24,3 +24,7 @@ Type: HITL
 ## Blocked by
 
 None - can start immediately
+
+## Comments
+
+- 2026-06-14: Decision: use ExcelJS for Slice 03. Verified in the Cloudflare Workers test runtime with `nodejs_compat` via `pnpm test`: `buildSpikeXlsx()` uses `workbook.xlsx.writeBuffer()`, embeds a PNG with `workbook.addImage()`, and ExcelJS reload confirms worksheet cell data plus `worksheet.getImages().length === 1`. fflate fallback is not needed for the current runtime/package set.
