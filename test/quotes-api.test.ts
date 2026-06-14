@@ -1,14 +1,10 @@
-import type { APIContext } from 'astro';
 import { env } from 'cloudflare:test';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { DELETE as deleteQuote, GET as getQuote, PUT as updateQuote } from '../src/pages/api/quotes/[id]';
 import { POST as regenerateXlsx } from '../src/pages/api/quotes/[id]/regenerate';
 import { GET as downloadXlsx } from '../src/pages/api/quotes/[id]/xlsx';
 import { GET as listQuotes, POST as createQuote } from '../src/pages/api/quotes/index';
-
-const TOKEN = 'test-token';
-
-type MockApiContext = APIContext<Record<string, unknown>, Record<string, string | undefined>>;
+import { authHeaders, context, json } from './helpers';
 
 async function resetDb(): Promise<void> {
   await env.DB.batch([
@@ -27,40 +23,6 @@ async function resetDb(): Promise<void> {
   ]);
 }
 
-function testEnv(): Cloudflare.Env {
-  return {
-    DB: env.DB,
-    FILES: env.FILES,
-    TEST_MIGRATIONS: env.TEST_MIGRATIONS,
-    QUOTA_API_TOKEN: TOKEN,
-  };
-}
-
-function context(
-  path: string,
-  init: RequestInit = {},
-  params: Record<string, string> = {}
-): MockApiContext {
-  const request = new Request(`https://quota.test${path}`, init);
-
-  return {
-    request,
-    params,
-    locals: {
-      runtime: {
-        env: testEnv(),
-      },
-    },
-    url: new URL(request.url),
-  } as unknown as MockApiContext;
-}
-
-function authHeaders(): HeadersInit {
-  return {
-    Authorization: `Bearer ${TOKEN}`,
-  };
-}
-
 function quotePayload(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     client_name: '安可整合行銷',
@@ -74,10 +36,6 @@ function quotePayload(overrides: Record<string, unknown> = {}): Record<string, u
     items: [{ name: '策略規劃', description: '品牌與行銷策略', qty: 2, unit: '式', unit_price: 48000 }],
     ...overrides,
   };
-}
-
-async function json(response: Response): Promise<Record<string, unknown>> {
-  return (await response.json()) as Record<string, unknown>;
 }
 
 async function createValidQuote(): Promise<Record<string, unknown>> {
