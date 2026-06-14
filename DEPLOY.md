@@ -64,6 +64,22 @@ wrangler deploy
 
 Record the deployed URL. The canary examples below call it `DEPLOY_URL`.
 
+## 5b. Custom Domain (optional)
+
+Attaching a Worker custom domain via `[[routes]] custom_domain = true` in wrangler.toml
+also disables `workers.dev` unless you add `workers_dev = true`. If the zone apex already
+has DNS records, apex attachment fails — use a subdomain.
+
+Reliable alternative (attach via API; persists across deploys, leaves workers.dev intact):
+
+```sh
+curl -X PUT "https://api.cloudflare.com/client/v4/accounts/<ACCOUNT_ID>/workers/domains" \
+  -H "Authorization: Bearer <API_TOKEN_with_Workers+DNS_edit>" -H "Content-Type: application/json" \
+  -d '{"zone_id":"<ZONE_ID>","hostname":"app.example.com","service":"quota","environment":"production"}'
+```
+
+This deployment uses `app.quote24.cc` (apex `quote24.cc` is occupied by other DNS).
+
 ## 6. Cloudflare Access
 
 In the Cloudflare Zero Trust dashboard, create an Access Application for the deployed Quota domain.
