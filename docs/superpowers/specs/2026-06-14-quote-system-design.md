@@ -12,7 +12,7 @@
 2. 資料存 Cloudflare D1（報價、客戶、公司資料），檔案存 R2。
 3. **對話產報價**：使用者在 Claude Code 對話講「生一張給範例客戶，網路行銷一年 48000」，Claude 呼叫 API 建單並回傳檢視/下載連結。
 
-來源參考：`reference/20260519_範例客戶_行銷_報價單.xlsx`。品牌素材已抽出至 `seed/brand/`。
+來源參考：`examples/demo-reference/20260519_範例客戶_行銷_報價單.xlsx`。品牌素材已抽出至 `examples/demo-brand/`。
 
 ## 2. 品牌系統
 
@@ -23,7 +23,7 @@
 | 印章（藍） | `#004A85`（PNG 已含透明背景，可直接疊） |
 | 字體 | Noto Sans TC / Microsoft JhengHei；標題可搭 Arial |
 | 風格 | 專業簡約現代：白底、大留白、金色細線當分隔/表頭/總計強調，A4 比例 |
-| 素材 | `seed/brand/logo.png`(振禾 logo)、`stamp.png`(報價專用章)、`bank.jpg`(玉山存摺) → 部署時種入 R2 `brand/` |
+| 素材 | `examples/demo-brand/logo.png`(振禾 logo)、`stamp.png`(報價專用章)、`bank.jpg`(玉山存摺) → 部署時種入 R2 `brand/` |
 
 固定品牌元素（全部保留）：振禾 logo、金色主色、報價專用章、玉山銀行匯款資訊、5% 稅率、預設備註範本。
 
