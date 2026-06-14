@@ -101,6 +101,24 @@ Leave API behavior as follows:
 
 If your Access configuration applies to the whole domain, add bypass or exclusion handling for `/api/health` and avoid blocking machine-token API clients.
 
+Recommended setup (two Access apps; the more specific `/api` path wins):
+
+1. `your-domain/api` — decision **bypass**, include **everyone** (so MCP/machine clients reach the bearer-gated API and `/api/health` stays public).
+2. `your-domain` — decision **allow**, include your operator **email** (One-time PIN). Gates the whole UI.
+
+This can be done in the Zero Trust dashboard, or via API:
+
+```sh
+curl -X POST "https://api.cloudflare.com/client/v4/accounts/<ACCT>/access/apps" \
+  -H "Authorization: Bearer <API_TOKEN>" -H "Content-Type: application/json" \
+  -d '{"name":"Quota API (bypass)","domain":"your-domain/api","type":"self_hosted","session_duration":"24h","policies":[{"name":"bypass","decision":"bypass","include":[{"everyone":{}}]}]}'
+curl -X POST "https://api.cloudflare.com/client/v4/accounts/<ACCT>/access/apps" \
+  -H "Authorization: Bearer <API_TOKEN>" -H "Content-Type: application/json" \
+  -d '{"name":"Quota UI","domain":"your-domain","type":"self_hosted","session_duration":"24h","policies":[{"name":"allow-owner","decision":"allow","include":[{"email":{"email":"you@example.com"}}]}]}'
+```
+
+Optional app-level fallback: `src/middleware.ts` enforces HTTP Basic Auth when the `UI_PASSWORD` secret is set. Leave that secret UNSET when using Cloudflare Access (otherwise users get prompted twice).
+
 ## 7. Seed Brand Assets
 
 After deploy, seed demo assets or your own company assets:
@@ -118,11 +136,17 @@ Then open `/settings` and fill the company profile, bank text, default tax rate,
 
 ## 8. Install MCP
 
-Install the MCP server after publishing or linking the package:
+Build the MCP package, then install it (user scope = available in all your Claude sessions). Until `quota-mcp` is published to npm, point at the local build:
 
 ```sh
-claude mcp add quota -- npx -y quota-mcp
+pnpm --dir packages/mcp build
+claude mcp add quota --scope user \
+  --env QUOTA_API_URL=https://your-domain \
+  --env QUOTA_API_TOKEN=<token> \
+  -- node "$(pwd)/packages/mcp/dist/index.js"
 ```
+
+Once published to npm you can instead use `claude mcp add quota -- npx -y quota-mcp`.
 
 Configure the MCP runtime environment:
 
