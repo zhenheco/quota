@@ -1,17 +1,112 @@
 ---
-const title = 'Quota';
+import Base from '../layouts/Base.astro';
+import { listQuotes, updateQuoteStatus } from '../server/quotes-service';
+import { runtimeEnv } from '../server/runtime-env';
+import { actionFromForm, formId, quoteStatusFromForm } from '../server/ui-forms';
+
+const env = runtimeEnv(Astro.locals);
+let error = '';
+
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const id = formId(data);
+    const status = quoteStatusFromForm(data);
+
+    if (actionFromForm(data) === 'status' && id !== null && status !== undefined) {
+      await updateQuoteStatus(env, id, status);
+      return Astro.redirect('/');
+    }
+
+    error = '無法更新狀態。';
+  } catch (updateError) {
+    console.error(updateError);
+    error = '無法更新狀態。';
+  }
+}
+
+const url = new URL(Astro.request.url);
+const client = url.searchParams.get('client') ?? '';
+const status = url.searchParams.get('status') ?? '';
+const date = url.searchParams.get('date') ?? '';
+const quotes = await listQuotes(env, {
+  client,
+  status: status === 'draft' || status === 'sent' || status === 'accepted' || status === 'void' ? status : undefined,
+  date,
+});
+const statusLabels = {
+  draft: '草稿',
+  sent: '已送出',
+  accepted: '已接受',
+  void: '作廢',
+};
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-  </head>
-  <body>
-    <main>
-      <h1>{title}</h1>
-      <p>Quote system scaffold is running.</p>
-    </main>
-  </body>
-</html>
+<Base title="報價清單 | Quota">
+  <main class="page">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">QUOTES</p>
+        <h1>報價清單</h1>
+      </div>
+      <a class="button button--primary" href="/new">新增報價</a>
+    </header>
+
+    {error && <p class="status-pill">{error}</p>}
+
+    <form class="panel toolbar no-print" method="GET">
+      <input name="client" placeholder="搜尋客戶或客戶 ID" value={client} />
+      <select name="status">
+        <option value="">全部狀態</option>
+        {Object.entries(statusLabels).map(([value, label]) => <option value={value} selected={status === value}>{label}</option>)}
+      </select>
+      <input name="date" type="date" value={date} />
+      <button type="submit">篩選</button>
+      <a class="button button--ghost" href="/">清除</a>
+    </form>
+
+    <section class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>單號</th>
+            <th>客戶</th>
+            <th>主題</th>
+            <th>日期</th>
+            <th class="num">總計</th>
+            <th>狀態</th>
+            <th class="no-print">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            quotes.map((quote) => (
+              <tr>
+                <td><a href={`/q/${quote.id}`}>{quote.quote_no}</a></td>
+                <td>{quote.client_name}</td>
+                <td>{quote.subject}</td>
+                <td>{quote.quote_date}</td>
+                <td class="num">{quote.total.toLocaleString('zh-TW')}</td>
+                <td>
+                  <form method="POST" class="toolbar">
+                    <input type="hidden" name="action" value="status" />
+                    <input type="hidden" name="id" value={quote.id} />
+                    <select name="status" aria-label="報價狀態">
+                      {Object.entries(statusLabels).map(([value, label]) => <option value={value} selected={quote.status === value}>{label}</option>)}
+                    </select>
+                    <button type="submit">更新</button>
+                  </form>
+                </td>
+                <td class="row-actions no-print">
+                  <a class="button" href={`/q/${quote.id}`}>檢視</a>
+                  <a class="button" href={`/q/${quote.id}/edit`}>編輯</a>
+                  <a class="button" href={`/new?copy=${quote.id}`}>複製</a>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </section>
+  </main>
+</Base>

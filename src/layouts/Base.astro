@@ -1,0 +1,48 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+}
+
+const { title = 'Quota' } = Astro.props;
+const pathname = Astro.url.pathname;
+
+function current(href: string): 'page' | undefined {
+  if (href === '/') {
+    return pathname === '/' ? 'page' : undefined;
+  }
+
+  return pathname.startsWith(href) ? 'page' : undefined;
+}
+---
+
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <title>{title}</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar no-print">
+        <div class="topbar__inner">
+          <a class="brand-mark" href="/">Quota</a>
+          <nav class="nav" aria-label="主要導覽">
+            <a href="/" aria-current={current('/')}>報價</a>
+            <a href="/clients" aria-current={current('/clients')}>客戶</a>
+            <a href="/settings" aria-current={current('/settings')}>設定</a>
+          </nav>
+        </div>
+      </header>
+      <slot />
+    </div>
+  </body>
+</html>

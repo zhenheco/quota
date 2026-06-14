@@ -1,0 +1,60 @@
+---
+import QuoteEditor from '../../../components/QuoteEditor.astro';
+import Base from '../../../layouts/Base.astro';
+import { listClients } from '../../../server/clients-service';
+import { getCompany } from '../../../server/company-service';
+import { getQuote, updateQuote } from '../../../server/quotes-service';
+import { runtimeEnv } from '../../../server/runtime-env';
+import { quoteInputFromForm } from '../../../server/ui-forms';
+import { quoteId } from '../../../server/ui-quotes';
+
+const env = runtimeEnv(Astro.locals);
+const id = quoteId(Astro.params.id);
+
+if (id === null) {
+  return Astro.redirect('/');
+}
+
+const company = await getCompany(env);
+const clients = await listClients(env);
+let quote = await getQuote(env, id);
+let error = '';
+
+if (quote === null) {
+  return Astro.redirect('/');
+}
+
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const validation = quoteInputFromForm(data);
+
+    if (!validation.ok) {
+      error = validation.error;
+    } else {
+      const updated = await updateQuote(env, id, validation.value);
+
+      if (updated === null) {
+        return Astro.redirect('/');
+      }
+
+      return Astro.redirect(`/q/${updated.id}`);
+    }
+  } catch (updateError) {
+    console.error(updateError);
+    error = '無法更新報價單。';
+  }
+}
+---
+
+<Base title={`編輯 ${quote.quote_no} | Quota`}>
+  <main class="page page--wide">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">EDIT QUOTE</p>
+        <h1>編輯 {quote.quote_no}</h1>
+      </div>
+    </header>
+    <QuoteEditor quote={quote} company={company} clients={clients} submitLabel="更新報價" error={error} />
+  </main>
+</Base>

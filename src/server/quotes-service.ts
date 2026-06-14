@@ -57,7 +57,19 @@ export async function updateQuote(env: QuotesEnv, id: number, input: ValidQuoteI
 
   const { items, ...quoteInput } = input;
 
-  return quotesRepo(env.DB).update(id, quoteInput, items);
+  const quote = await quotesRepo(env.DB).update(id, quoteInput, items);
+
+  return writeQuoteXlsx(env, quote);
+}
+
+export async function updateQuoteStatus(env: QuotesEnv, id: number, status: QuoteStatus): Promise<Quote | null> {
+  const existing = await quotesRepo(env.DB).get(id);
+
+  if (existing === null) {
+    return null;
+  }
+
+  return quotesRepo(env.DB).updateStatus(id, status);
 }
 
 export async function deleteQuote(env: QuotesEnv, id: number): Promise<boolean> {

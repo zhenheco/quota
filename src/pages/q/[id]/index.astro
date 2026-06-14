@@ -1,0 +1,76 @@
+---
+import QuoteDocument from '../../../components/QuoteDocument.astro';
+import Base from '../../../layouts/Base.astro';
+import { getCompany } from '../../../server/company-service';
+import { getQuote, updateQuoteStatus } from '../../../server/quotes-service';
+import { runtimeEnv } from '../../../server/runtime-env';
+import { quoteStatusFromForm } from '../../../server/ui-forms';
+import { quoteId } from '../../../server/ui-quotes';
+
+const env = runtimeEnv(Astro.locals);
+const id = quoteId(Astro.params.id);
+
+if (id === null) {
+  return Astro.redirect('/');
+}
+
+let error = '';
+
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const status = quoteStatusFromForm(data);
+
+    if (status !== undefined) {
+      await updateQuoteStatus(env, id, status);
+      return Astro.redirect(`/q/${id}`);
+    }
+
+    error = '無法更新狀態。';
+  } catch (updateError) {
+    console.error(updateError);
+    error = '無法更新狀態。';
+  }
+}
+
+const [quote, company] = await Promise.all([getQuote(env, id), getCompany(env)]);
+
+if (quote === null) {
+  return Astro.redirect('/');
+}
+
+const statusLabels = {
+  draft: '草稿',
+  sent: '已送出',
+  accepted: '已接受',
+  void: '作廢',
+};
+---
+
+<Base title={`${quote.quote_no} | Quota`}>
+  <main class="page">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">QUOTE</p>
+        <h1>{quote.quote_no}</h1>
+      </div>
+      <div class="toolbar no-print">
+        <a class="button" href={`/q/${quote.id}/edit`}>編輯</a>
+        <a class="button button--primary" href={`/q/${quote.id}/download`}>下載 xlsx</a>
+        <button class="button" type="button" onclick="window.print()">列印 / 存 PDF</button>
+      </div>
+    </header>
+
+    {error && <p class="status-pill no-print">{error}</p>}
+
+    <form class="panel toolbar no-print" method="POST">
+      <label for="status">狀態</label>
+      <select id="status" name="status">
+        {Object.entries(statusLabels).map(([value, label]) => <option value={value} selected={quote.status === value}>{label}</option>)}
+      </select>
+      <button type="submit">更新狀態</button>
+    </form>
+
+    <QuoteDocument quote={quote} company={company} />
+  </main>
+</Base>

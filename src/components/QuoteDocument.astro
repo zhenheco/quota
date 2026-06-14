@@ -1,0 +1,95 @@
+---
+import { createQuoteDocumentView } from '../server/quote-document-view';
+import type { Company, Quote } from '../server/types';
+
+interface Props {
+  quote: Quote;
+  company: Company;
+}
+
+const { quote, company } = Astro.props;
+const view = createQuoteDocumentView({ quote, company });
+---
+
+<article class={view.sheetClass} aria-label="報價單預覽">
+  <header class="quotation-sheet__header">
+    <div>
+      {company.logo_key && <img class="brand-asset" src={`/q/${quote.id}/asset?type=logo`} alt={view.companyName} />}
+      <p class="eyebrow">QUOTATION</p>
+      <h1 class="quotation-title" data-preview="subject">{view.subject}</h1>
+      <p data-preview="companyName">{view.companyName}</p>
+      <p class="muted">
+        <span data-preview="companyAddress">{view.companyAddress}</span>
+        {view.companyAddress && view.companyPhone && ' / '}
+        <span data-preview="companyPhone">{view.companyPhone}</span>
+      </p>
+    </div>
+    <div class="quote-meta">
+      <div><span>報價單號</span><strong data-preview="quoteNo">{view.quoteNo}</strong></div>
+      <div><span>報價日期</span><strong data-preview="quoteDate">{view.quoteDate}</strong></div>
+      <div><span>有效期限</span><strong data-preview="validUntil">{view.validUntil}</strong></div>
+    </div>
+  </header>
+
+  <section class="document-section document-grid">
+    <div>
+      <p class="eyebrow">CLIENT</p>
+      <h2 data-preview="clientName">{view.clientName}</h2>
+      <p>
+        <span data-preview="clientContact">{view.clientContact}</span>
+        {view.clientContact && view.clientPhone && ' / '}
+        <span data-preview="clientPhone">{view.clientPhone}</span>
+      </p>
+    </div>
+    <div>
+      <p class="eyebrow">TERMS</p>
+      <p data-preview="notes">{view.notes}</p>
+    </div>
+  </section>
+
+  <section class="document-section">
+    <table class="quote-items">
+      <thead>
+        <tr>
+          <th>品項</th>
+          <th>說明</th>
+          <th class="num">數量</th>
+          <th>單位</th>
+          <th class="num">單價</th>
+          <th class="num">小計</th>
+        </tr>
+      </thead>
+      <tbody data-preview="items">
+        {
+          view.items.map((item) => (
+            <tr>
+              <td>{item.name}</td>
+              <td>{item.description}</td>
+              <td class="num">{item.qtyLabel}</td>
+              <td>{item.unit}</td>
+              <td class="num">{item.unitPriceLabel}</td>
+              <td class="num">{item.amountLabel}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </section>
+
+  <section class="document-section totals">
+    <div><span>未稅小計</span><strong data-preview="subtotal">{view.subtotalLabel}</strong></div>
+    <div><span>營業稅 <span data-preview="taxRate">{view.taxRateLabel}</span></span><strong data-preview="taxAmount">{view.taxAmountLabel}</strong></div>
+    <div class="grand"><span>總計</span><strong data-preview="total">{view.totalLabel}</strong></div>
+  </section>
+
+  <section class="document-section document-grid">
+    <div>
+      <p class="eyebrow">BANK</p>
+      <p data-preview="bankInfo">{view.bankInfo}</p>
+      {company.bank_image_key && <img class="brand-asset" src={`/q/${quote.id}/asset?type=bank`} alt="匯款資訊" />}
+    </div>
+    <div>
+      {company.stamp_key && <img class="brand-asset" src={`/q/${quote.id}/asset?type=stamp`} alt="公司章" />}
+    </div>
+  </section>
+</article>

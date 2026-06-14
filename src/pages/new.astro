@@ -1,0 +1,46 @@
+---
+import QuoteEditor from '../components/QuoteEditor.astro';
+import Base from '../layouts/Base.astro';
+import { listClients } from '../server/clients-service';
+import { getCompany } from '../server/company-service';
+import { createQuote, getQuote } from '../server/quotes-service';
+import { runtimeEnv } from '../server/runtime-env';
+import { quoteInputFromForm } from '../server/ui-forms';
+import { copyQuote, editableQuote } from '../server/ui-quotes';
+
+const env = runtimeEnv(Astro.locals);
+const company = await getCompany(env);
+const clients = await listClients(env);
+const copyId = Number(Astro.url.searchParams.get('copy'));
+const copied = Number.isInteger(copyId) && copyId > 0 ? await getQuote(env, copyId) : null;
+let quote = copied ? copyQuote(copied) : editableQuote(company);
+let error = '';
+
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const validation = quoteInputFromForm(data);
+
+    if (!validation.ok) {
+      error = validation.error;
+    } else {
+      return Astro.redirect((await createQuote(env, validation.value)).view_url);
+    }
+  } catch (createError) {
+    console.error(createError);
+    error = '無法建立報價單。';
+  }
+}
+---
+
+<Base title="新增報價 | Quota">
+  <main class="page page--wide">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">NEW QUOTE</p>
+        <h1>新增報價</h1>
+      </div>
+    </header>
+    <QuoteEditor quote={quote} company={company} clients={clients} submitLabel="儲存報價" error={error} />
+  </main>
+</Base>

@@ -218,6 +218,38 @@ describe('quotes API routes', () => {
     expect(row?.xlsx_key).toBe('quotes/20260614-01/20260614-01.xlsx');
   });
 
+  it('refreshes the downloadable xlsx after editing a quote', async () => {
+    const created = await createValidQuote();
+    const id = String(created.id);
+    const key = `quotes/${created.quote_no}/${created.quote_no}.xlsx`;
+    const originalObject = await env.FILES.get(key);
+    const originalBytes = await originalObject?.arrayBuffer();
+
+    const updateResponse = await updateQuote(
+      context(
+        `/api/quotes/${id}`,
+        {
+          method: 'PUT',
+          headers: authHeaders(),
+          body: JSON.stringify(
+            quotePayload({
+              subject: '網站改版',
+              items: [{ name: '專案管理', qty: 4, unit: 'hr', unit_price: 2000 }],
+            })
+          ),
+        },
+        { id }
+      )
+    );
+    const updatedObject = await env.FILES.get(key);
+    const updatedBytes = await updatedObject?.arrayBuffer();
+
+    expect(updateResponse.status).toBe(200);
+    expect(originalBytes).toBeDefined();
+    expect(updatedBytes).toBeDefined();
+    expect(bytesEqual(updatedBytes ?? new ArrayBuffer(0), originalBytes ?? new ArrayBuffer(0))).toBe(false);
+  });
+
   it('returns 400 for invalid payloads', async () => {
     const response = await createQuote(
       context('/api/quotes', {
@@ -231,3 +263,10 @@ describe('quotes API routes', () => {
     await expect(response.text()).resolves.toContain('subject');
   });
 });
+
+function bytesEqual(left: ArrayBuffer, right: ArrayBuffer): boolean {
+  const leftBytes = new Uint8Array(left);
+  const rightBytes = new Uint8Array(right);
+
+  return leftBytes.length === rightBytes.length && leftBytes.every((value, index) => value === rightBytes[index]);
+}
