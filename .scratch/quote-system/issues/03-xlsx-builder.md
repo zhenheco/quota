@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: closed
 Type: AFK
 
 # 03 — xlsx builder（伺服器端，像素對齊原稿 + 嵌圖）
