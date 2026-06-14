@@ -1,7 +1,12 @@
 name = "quota"
-# Deploy uses Astro-generated dist/server/wrangler.json; this root config is for local/test bindings.
-# Before production deploy, run `wrangler d1 create quota` and replace database_id with the returned id.
-# Keep binding names stable: DB for D1, FILES for R2.
+# Deploy uses Astro-generated dist/server/wrangler.json (run `pnpm build` then
+# `wrangler deploy -c dist/server/wrangler.json`). This root config supplies the
+# bindings the adapter merges in. Binding names are stable: DB (D1), FILES (R2), SESSION (KV).
+#
+# SELF-HOSTERS: the ids below are the maintainer's resources. Replace them with your
+# own after `wrangler d1 create quota`, `wrangler r2 bucket create quota-files`,
+# `wrangler kv namespace create quota-session`. Resource ids are not secrets, but they
+# point at the maintainer's account — your deploy must use yours. See DEPLOY.md.
 compatibility_date = "2026-06-12"
 compatibility_flags = ["nodejs_compat"]
 
@@ -11,11 +16,14 @@ directory = "./dist"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "quota-dev"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_name = "quota"
+database_id = "43fb8040-cca2-4da4-b9bf-e456a6755922"
 migrations_dir = "migrations"
 
 [[r2_buckets]]
 binding = "FILES"
-# Before production deploy, run `wrangler r2 bucket create quota-files` and replace this with the real bucket name.
-bucket_name = "quota-files-dev"
+bucket_name = "quota-files"
+
+[[kv_namespaces]]
+binding = "SESSION"
+id = "db327ea7a9734fceac91aa806125a3ba"
