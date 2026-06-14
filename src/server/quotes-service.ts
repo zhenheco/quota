@@ -2,9 +2,11 @@ import { getBrandAsset } from './brand';
 import { companyRepo, quotesRepo } from './db';
 import { generateQuoteXlsx } from './quote-xlsx';
 import type { Quote, QuoteListFilter, QuoteStatus } from './types';
-import type { ValidQuoteInput } from './validation';
+import { ValidationError, type ValidQuoteInput } from './validation';
 
 const XLSX_CONTENT_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const COMPANY_PROFILE_REQUIRED_MESSAGE =
+  '請先在設定頁填寫公司名稱再建立報價單。(Set your company name in Settings before creating a quote.)';
 
 export interface QuoteSummary {
   id: number;
@@ -28,6 +30,8 @@ export async function listQuotes(env: QuotesEnv, filter: QuoteListFilter = {}): 
 }
 
 export async function createQuote(env: QuotesEnv, input: ValidQuoteInput): Promise<QuoteSummary> {
+  await assertCompanyProfileReady(env);
+
   const { items, ...quoteInput } = input;
   const repo = quotesRepo(env.DB);
   const quote = await repo.create(quoteInput, items);
@@ -157,6 +161,14 @@ async function writeQuoteXlsx(env: QuotesEnv, quote: Quote): Promise<Quote> {
   });
 
   return quotesRepo(env.DB).updateXlsxKey(quote.id, key);
+}
+
+async function assertCompanyProfileReady(env: QuotesEnv): Promise<void> {
+  const company = await companyRepo(env.DB).get();
+
+  if (company.name.trim() === '') {
+    throw new ValidationError(COMPANY_PROFILE_REQUIRED_MESSAGE);
+  }
 }
 
 function quoteXlsxKey(quote: Quote): string {

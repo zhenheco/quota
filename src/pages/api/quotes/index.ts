@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { requireAuth } from '../../../server/auth';
 import { createQuote, listQuotes, parseQuoteStatus } from '../../../server/quotes-service';
 import { runtimeEnv } from '../../../server/runtime-env';
-import { validateQuoteInput } from '../../../server/validation';
+import { ValidationError, validateQuoteInput } from '../../../server/validation';
 
 export const GET: APIRoute = async ({ request, locals }) => {
   const env = runtimeEnv(locals);
@@ -46,6 +46,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
   } catch (error) {
     if (error instanceof SyntaxError) {
       return json({ error: 'Invalid JSON body.' }, 400);
+    }
+
+    if (error instanceof ValidationError) {
+      return json({ error: error.message }, 400);
     }
 
     console.error(error);

@@ -14,6 +14,13 @@ export type ValidationResult =
       error: string;
     };
 
+export class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+
 const CREATED_VIA_VALUES = new Set<CreatedVia>(['web', 'chat']);
 
 export function validateQuoteInput(payload: unknown): ValidationResult {

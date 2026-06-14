@@ -90,7 +90,8 @@ describe('quotes API routes', () => {
     expect(row?.xlsx_key).toBe(key);
   });
 
-  it('does not leave a quote row when xlsx generation fails during creation', async () => {
+  it('returns 400 and does not leave a quote row when the company name is blank during creation', async () => {
+    await env.FILES.delete('quotes/20260614-01/20260614-01.xlsx');
     await env.DB.prepare("UPDATE company_profile SET name = '' WHERE id = 1").run();
 
     const response = await createQuote(
@@ -104,8 +105,8 @@ describe('quotes API routes', () => {
     const itemCount = await env.DB.prepare('SELECT COUNT(*) AS count FROM quote_items').first<{ count: number }>();
     const object = await env.FILES.get('quotes/20260614-01/20260614-01.xlsx');
 
-    expect(response.status).toBe(500);
-    await expect(response.text()).resolves.toContain('Unable to create quote.');
+    expect(response.status).toBe(400);
+    await expect(response.text()).resolves.toMatch(/company|設定/);
     expect(quoteCount?.count).toBe(0);
     expect(itemCount?.count).toBe(0);
     expect(object).toBeNull();
