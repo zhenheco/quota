@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: closed
 Type: AFK
 
 # 08 — 去振禾化 + 品牌 setup + seed-brand CLI
