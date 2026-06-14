@@ -110,19 +110,19 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
         }
       }
       const suffix = params.size === 0 ? '' : `?${params.toString()}`;
-      const body = await request<{ quotes: unknown[] }>(`/api/quotes${suffix}`);
+      const body = await request<{ quotes: unknown[] }>(`/api/quotes${suffix}`, { method: 'GET' });
       return body.quotes;
     },
     async getQuote(id) {
-      const body = await request<{ quote: unknown }>(`/api/quotes/${encodeURIComponent(String(id))}`);
+      const body = await request<{ quote: unknown }>(`/api/quotes/${encodeURIComponent(String(id))}`, { method: 'GET' });
       return body.quote;
     },
     async listClients() {
-      const body = await request<{ clients: Client[] }>('/api/clients');
+      const body = await request<{ clients: Client[] }>('/api/clients', { method: 'GET' });
       return body.clients;
     },
     async getCompany() {
-      const body = await request<{ company: Company }>('/api/company');
+      const body = await request<{ company: Company }>('/api/company', { method: 'GET' });
       return body.company;
     },
   };

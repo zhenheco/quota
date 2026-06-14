@@ -30,6 +30,23 @@ const createQuoteInputShape = {
 
 const createQuoteInputSchema = z.object(createQuoteInputShape);
 
+const quoteStatusSchema = z.enum(['draft', 'sent', 'accepted', 'void']);
+
+const listQuotesInputShape = {
+  status: quoteStatusSchema.optional(),
+  client: z.string().optional(),
+  date: z.string().optional(),
+};
+
+const listQuotesInputSchema = z.object(listQuotesInputShape);
+
+const getQuoteInputShape = {
+  id: z.union([z.number().int().positive(), z.string().min(1)]),
+};
+
+const getQuoteInputSchema = z.object(getQuoteInputShape);
+const emptyInputSchema = z.object({});
+
 export interface ToolResult {
   content: [{ type: 'text'; text: string }];
   structuredContent?: Record<string, unknown>;
@@ -70,6 +87,39 @@ export function createQuotaTools(api: ApiClient) {
             xlsx_url: xlsxUrl,
           },
         };
+      },
+    } satisfies QuotaTool,
+    list_quotes: {
+      name: 'list_quotes',
+      description: 'List quotes through the Quota HTTP API.',
+      inputSchema: listQuotesInputShape,
+      async handler(input: unknown): Promise<ToolResult> {
+        const filter = listQuotesInputSchema.parse(input) satisfies QuoteListFilter;
+        const quotes = await api.listQuotes(filter);
+
+        return jsonToolResult('Quotes', { quotes });
+      },
+    } satisfies QuotaTool,
+    get_quote: {
+      name: 'get_quote',
+      description: 'Read one quote by id through the Quota HTTP API.',
+      inputSchema: getQuoteInputShape,
+      async handler(input: unknown): Promise<ToolResult> {
+        const parsed = getQuoteInputSchema.parse(input);
+        const quote = await api.getQuote(parsed.id);
+
+        return jsonToolResult('Quote', { quote });
+      },
+    } satisfies QuotaTool,
+    list_clients: {
+      name: 'list_clients',
+      description: 'List clients through the Quota HTTP API.',
+      inputSchema: {},
+      async handler(input: unknown): Promise<ToolResult> {
+        emptyInputSchema.parse(input);
+        const clients = await api.listClients();
+
+        return jsonToolResult('Clients', { clients });
       },
     } satisfies QuotaTool,
   };
@@ -152,6 +202,18 @@ function absoluteUrl(baseUrl: string, pathOrUrl: string): string {
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+function jsonToolResult(label: string, structuredContent: Record<string, unknown>): ToolResult {
+  return {
+    content: [
+      {
+        type: 'text',
+        text: `${label}:\n${JSON.stringify(structuredContent, null, 2)}`,
+      },
+    ],
+    structuredContent,
+  };
 }
 
 function omitUndefined<T extends Record<string, unknown>>(input: T): T {

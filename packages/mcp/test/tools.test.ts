@@ -186,3 +186,115 @@ describe('create_quote tool', () => {
     expect(body).not.toHaveProperty('client_id');
   });
 });
+
+describe('read tools', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('list_quotes forwards filters and returns structured quotes', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      Response.json({
+        quotes: [
+          {
+            id: 12,
+            quote_no: '20260614-01',
+            status: 'draft',
+            client_name: 'Acme',
+          },
+        ],
+      })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const api = createApiClient({ baseUrl: 'https://quota.example.workers.dev', token: 'machine-token' });
+    const result = await createQuotaTools(api).list_quotes.handler({
+      status: 'draft',
+      client: 'Acme',
+      date: '2026-06-14',
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith('https://quota.example.workers.dev/api/quotes?status=draft&client=Acme&date=2026-06-14', {
+      method: 'GET',
+      headers: {
+        authorization: 'Bearer machine-token',
+      },
+    });
+    expect(result.structuredContent).toEqual({
+      quotes: [
+        {
+          id: 12,
+          quote_no: '20260614-01',
+          status: 'draft',
+          client_name: 'Acme',
+        },
+      ],
+    });
+  });
+
+  it('get_quote reads a quote by id and returns the quote payload', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      Response.json({
+        quote: {
+          id: 12,
+          quote_no: '20260614-01',
+          items: [{ name: 'Planning', qty: 2 }],
+        },
+      })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const api = createApiClient({ baseUrl: 'https://quota.example.workers.dev', token: 'machine-token' });
+    const result = await createQuotaTools(api).get_quote.handler({ id: 12 });
+
+    expect(fetchMock).toHaveBeenCalledWith('https://quota.example.workers.dev/api/quotes/12', {
+      method: 'GET',
+      headers: {
+        authorization: 'Bearer machine-token',
+      },
+    });
+    expect(result.structuredContent).toEqual({
+      quote: {
+        id: 12,
+        quote_no: '20260614-01',
+        items: [{ name: 'Planning', qty: 2 }],
+      },
+    });
+  });
+
+  it('list_clients returns the clients payload', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      Response.json({
+        clients: [
+          {
+            id: 7,
+            name: 'Acme',
+            contact: 'Amy',
+            phone: '0912-345-678',
+          },
+        ],
+      })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const api = createApiClient({ baseUrl: 'https://quota.example.workers.dev', token: 'machine-token' });
+    const result = await createQuotaTools(api).list_clients.handler({});
+
+    expect(fetchMock).toHaveBeenCalledWith('https://quota.example.workers.dev/api/clients', {
+      method: 'GET',
+      headers: {
+        authorization: 'Bearer machine-token',
+      },
+    });
+    expect(result.structuredContent).toEqual({
+      clients: [
+        {
+          id: 7,
+          name: 'Acme',
+          contact: 'Amy',
+          phone: '0912-345-678',
+        },
+      ],
+    });
+  });
+});
