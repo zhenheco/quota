@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { ApiClient, Client, QuoteInput, QuoteListFilter } from './api-client';
+import type { ApiClient, Client, QuoteInput, QuoteListFilter } from './api-client.js';
 
 const quoteItemSchema = z.object({
   name: z.string().min(1),
@@ -48,6 +48,7 @@ const getQuoteInputSchema = z.object(getQuoteInputShape);
 const emptyInputSchema = z.object({});
 
 export interface ToolResult {
+  [key: string]: unknown;
   content: [{ type: 'text'; text: string }];
   structuredContent?: Record<string, unknown>;
 }

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createApiClient } from '../src/api-client';
+import { readConfig } from '../src/index';
 import { createQuotaTools } from '../src/tools';
 
 describe('api client', () => {
@@ -60,6 +61,25 @@ describe('api client', () => {
         items: [{ name: 'Strategy', qty: 1, unit_price: 1000 }],
       })
     ).rejects.toThrow('Quota API request failed with status 401: Unauthorized');
+  });
+});
+
+describe('server config', () => {
+  it('requires QUOTA_API_URL and QUOTA_API_TOKEN', () => {
+    expect(() => readConfig({ QUOTA_API_TOKEN: 'token' })).toThrow('QUOTA_API_URL is required');
+    expect(() => readConfig({ QUOTA_API_URL: 'https://quota.example.workers.dev' })).toThrow('QUOTA_API_TOKEN is required');
+  });
+
+  it('reads API config from env', () => {
+    expect(
+      readConfig({
+        QUOTA_API_URL: 'https://quota.example.workers.dev',
+        QUOTA_API_TOKEN: 'token',
+      })
+    ).toEqual({
+      baseUrl: 'https://quota.example.workers.dev',
+      token: 'token',
+    });
   });
 });
 
