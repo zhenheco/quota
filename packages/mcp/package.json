@@ -1,13 +1,39 @@
 {
   "name": "quota-mcp",
   "version": "0.1.0",
+  "description": "MCP server for the Quota self-hosted quotation system — create/list/get quotes and clients over its HTTP API.",
+  "license": "MIT",
+  "homepage": "https://github.com/zhenheco/quota/tree/main/packages/mcp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhenheco/quota.git",
+    "directory": "packages/mcp"
+  },
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "quotation",
+    "quote",
+    "invoice",
+    "cloudflare",
+    "exceljs"
+  ],
   "type": "module",
   "bin": {
     "quota-mcp": "dist/index.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "vitest run --config vitest.config.ts"
+    "test": "vitest run --config vitest.config.ts",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
