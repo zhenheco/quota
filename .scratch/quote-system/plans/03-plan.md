@@ -30,7 +30,7 @@
   4. 品項表：表頭金色填色 + 邊框（項次/品名/說明/數量/單位/單價/金額），動態 N 列。
   5. 總計區：小計 / 稅率 / 稅金 / 總計（金色強調 total）。
   6. 備註 notes。
-  7. 頁尾：匯款資訊（company.bank_info）+ 嵌報價章與玉山存摺圖。
+  7. 頁尾：匯款資訊（company.bank_info）+ 嵌報價章與範例銀行存摺圖。
 - 嵌圖共 3：logo、stamp、bank（用 `workbook.addImage({buffer, extension})` + `worksheet.addImage(id, range)`）。缺某圖時略過該圖但不報錯（builder 容忍 brand 缺圖；但測試提供全 3 張）。
 
 ## Task 1: brand.ts（R2 存取，TDD）
@@ -77,7 +77,7 @@
 ## Notes for implementer
 
 - builder 必須是**純模組**（吃 buffer 回 bytes），不在裡面打 R2/D1，方便單測與 web/MCP 共用。
-- 可參考 `reference/20260519_範例客戶_行銷_報價單.xlsx` 的欄寬/版面當設計參考，但不要硬抄振禾文字內容（公司資料一律來自 company 參數）。
+- 可參考 `reference/20260519_範例客戶_行銷_報價單.xlsx` 的欄寬/版面當設計參考，但不要硬抄範例公司文字內容（公司資料一律來自 company 參數）。
 - 像素完美非硬性；優先：正確資料 + 3 圖 + 專業金色版面 + 動態列。
 - `pnpm test` + `pnpm lint` 全綠才完成，貼結果。Commit 身份 zhenheco <ace@zhenhe-co.com>。
 - 若 ExcelJS 嵌圖在 Workers runtime 出問題，停下回報，不要 hack。

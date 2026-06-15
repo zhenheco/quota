@@ -1,12 +1,12 @@
 # 報價單系統 (Quota) — 設計規格
 
 - 日期：2026-06-14
-- 廠商：振禾有限公司
+- 廠商：範例公司有限公司
 - 狀態：設計定案，待實作
 
 ## 1. 目標
 
-把振禾有限公司現有「手工 Excel 報價單」升級為一套部署在 Cloudflare 的報價單系統：
+把範例公司有限公司現有「手工 Excel 報價單」升級為一套部署在 Cloudflare 的報價單系統：
 
 1. 網頁表單填客戶 + 品項 → 即時預覽（專業簡約現代風）→ 產出排版精美的 `.xlsx`。
 2. 資料存 Cloudflare D1（報價、客戶、公司資料），檔案存 R2。
@@ -23,9 +23,9 @@
 | 印章（藍） | `#004A85`（PNG 已含透明背景，可直接疊） |
 | 字體 | Noto Sans TC / Microsoft JhengHei；標題可搭 Arial |
 | 風格 | 專業簡約現代：白底、大留白、金色細線當分隔/表頭/總計強調，A4 比例 |
-| 素材 | `examples/demo-brand/logo.png`(振禾 logo)、`stamp.png`(報價專用章)、`bank.jpg`(玉山存摺) → 部署時種入 R2 `brand/` |
+| 素材 | `examples/demo-brand/logo.png`(範例公司 logo)、`stamp.png`(報價專用章)、`bank.jpg`(範例銀行存摺) → 部署時種入 R2 `brand/` |
 
-固定品牌元素（全部保留）：振禾 logo、金色主色、報價專用章、玉山銀行匯款資訊、5% 稅率、預設備註範本。
+固定品牌元素（全部保留）：範例公司 logo、金色主色、報價專用章、範例銀行匯款資訊、5% 稅率、預設備註範本。
 
 ## 3. 架構
 
@@ -39,7 +39,7 @@
 ## 4. 資料模型（D1）
 
 ### `company_profile`（單列，可由 /settings 編輯）
-`id`(固定1) · `name` · `address` · `phone` · `bank_info`(玉山 808 中原分行 帳號…) · `default_tax_rate`(0.05) · `default_notes`(備註範本) · `logo_key` · `stamp_key` · `bank_image_key`
+`id`(固定1) · `name` · `address` · `phone` · `bank_info`(範例銀行 808 中原分行 帳號…) · `default_tax_rate`(0.05) · `default_notes`(備註範本) · `logo_key` · `stamp_key` · `bank_image_key`
 
 ### `clients`
 `id` · `name` · `contact` · `phone` · `email`(nullable) · `address`(nullable) · `created_at` · `updated_at`
@@ -80,7 +80,7 @@
 
 - 模組 `src/server/quote-xlsx.ts`：`generateQuoteXlsx(quote, items, company, brandAssets) → ArrayBuffer`。
 - 用 **ExcelJS** `workbook.xlsx.writeBuffer()`（避開 fs/stream，只用 buffer），圖片以 R2 取得的 arraybuffer 嵌入。
-- 版面：欄寬對齊原稿、合併抬頭、金色表頭填色 + 邊框、品項列（動態 N 列）、總計區（小計/稅率/稅金/總計）、備註、嵌 logo(上) + 報價章與玉山存摺(下)。數字格式 `#,##0`、日期格式化。
+- 版面：欄寬對齊原稿、合併抬頭、金色表頭填色 + 邊框、品項列（動態 N 列）、總計區（小計/稅率/稅金/總計）、備註、嵌 logo(上) + 報價章與範例銀行存摺(下)。數字格式 `#,##0`、日期格式化。
 - 產生後寫入 R2 `quotes/{quote_no}/{quote_no}.xlsx`，更新 D1 `xlsx_key`。
 
 **風險與 fallback**：ExcelJS 在 Workers runtime 有 Node 相容性風險。

@@ -199,7 +199,7 @@ describe('company API route', () => {
       context('/api/company', {
         method: 'PUT',
         headers: authHeaders(),
-        body: JSON.stringify({ name: '範例客戶', tax_id: '24536806', bank_info: '玉山銀行 808 / 1234' }),
+        body: JSON.stringify({ name: '範例客戶', tax_id: '24536806', bank_info: '範例銀行 808 / 1234' }),
       })
     );
     const updateBody = await json(updateResponse);
@@ -210,7 +210,7 @@ describe('company API route', () => {
       tax_id: '24536806',
       address: '',
       phone: '',
-      bank_info: '玉山銀行 808 / 1234',
+      bank_info: '範例銀行 808 / 1234',
       default_tax_rate: 0.05,
       default_notes: '',
     });

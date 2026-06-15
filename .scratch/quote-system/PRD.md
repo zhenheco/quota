@@ -7,7 +7,7 @@ Status: ready-for-agent
 
 ## Problem Statement
 
-振禾有限公司現在靠「複製一份舊 Excel 再手改」開報價單：每張都要手動換客戶、品項、日期、單價，手算小計與 5% 稅、再貼 logo / 報價章 / 玉山匯款圖。痛點：金額/稅常算錯、報價單號靠記憶易撞號或跳號、找舊報價得翻檔案夾、想在跟 Claude 對話時順手開一張完全辦不到。振禾自己用之外，其他小公司有一模一樣的痛，但他們的品牌不是振禾，沒地方換成自己的。
+範例公司有限公司現在靠「複製一份舊 Excel 再手改」開報價單：每張都要手動換客戶、品項、日期、單價，手算小計與 5% 稅、再貼 logo / 報價章 / 範例銀行匯款圖。痛點：金額/稅常算錯、報價單號靠記憶易撞號或跳號、找舊報價得翻檔案夾、想在跟 Claude 對話時順手開一張完全辦不到。範例公司自己用之外，其他小公司有一模一樣的痛，但他們的品牌不是範例公司，沒地方換成自己的。
 
 ## Solution
 
@@ -16,26 +16,26 @@ Status: ready-for-agent
 1. **網頁開單**：左填表、右即時預覽（專業簡約現代風、A4），一鍵產出排版精美 `.xlsx`，或瀏覽器列印存 PDF。
 2. **對話開單**：任何 Claude session 裝上本專案 **MCP server**，講「生一張給範例客戶，網路行銷一年 48000」→ Claude 呼叫 `create_quote` 工具自動建單回傳連結。
 3. **資料自有**：報價/客戶/公司品牌存使用者自己的 CF D1/R2。
-4. **開源可換品牌**：別人 clone → 部署自己的 CF → `/settings` 或 `seed-brand` CLI 填自己品牌，零振禾殘留，出廠全空白 + 首次 setup 引導。
+4. **開源可換品牌**：別人 clone → 部署自己的 CF → `/settings` 或 `seed-brand` CLI 填自己品牌，零範例公司殘留，出廠全空白 + 首次 setup 引導。
 
 ## User Stories
 
-1. As 振禾業務, I want 在網頁清單看到所有報價（可搜尋客戶/狀態/日期）, so that 不用翻檔案夾找舊單。
-2. As 振禾業務, I want 在 `/new` 左表單填客戶+品項、右邊即時看到排版預覽, so that 開單前就確認版面對。
-3. As 振禾業務, I want 品項列可增刪、輸入數量×單價自動算 amount, so that 不用手算每列。
-4. As 振禾業務, I want 系統自動算 subtotal、5% 稅金、total（四捨五入）, so that 不會算錯（48000 → 稅 2400 → 總 50400）。
-5. As 振禾業務, I want 一鍵下載排版精美的 `.xlsx`（含 logo、報價章、玉山匯款圖）, so that 直接寄給客戶。
-6. As 振禾業務, I want 用瀏覽器列印 (Cmd+P) 存成乾淨 A4 PDF, so that 不需另裝工具就有 PDF。
-7. As 振禾業務, I want 複製一張舊報價當新單起點, so that 類似報價秒開。
-8. As 振禾業務, I want 改報價狀態（draft/sent/accepted/void）, so that 追蹤每張進度。
-9. As 振禾業務, I want 報價單號自動 `YYYYMMDD-NN`（當日序號遞增、跨日歸零、併發不撞號）, so that 編號永遠唯一且有序。
-10. As 振禾業務, I want 客戶資訊在建單當下快照進報價, so that 之後改客戶資料不會回頭竄改歷史報價。
-11. As 振禾業務, I want 管理客戶（新增/編輯/刪除、選既有客戶帶入）, so that 不重複輸入常用客戶。
-12. As 振禾老闆, I want 在 `/settings` 設定公司名/地址/電話/匯款/預設稅率/預設備註, so that 全站套用統一資訊。
+1. As 範例公司業務, I want 在網頁清單看到所有報價（可搜尋客戶/狀態/日期）, so that 不用翻檔案夾找舊單。
+2. As 範例公司業務, I want 在 `/new` 左表單填客戶+品項、右邊即時看到排版預覽, so that 開單前就確認版面對。
+3. As 範例公司業務, I want 品項列可增刪、輸入數量×單價自動算 amount, so that 不用手算每列。
+4. As 範例公司業務, I want 系統自動算 subtotal、5% 稅金、total（四捨五入）, so that 不會算錯（48000 → 稅 2400 → 總 50400）。
+5. As 範例公司業務, I want 一鍵下載排版精美的 `.xlsx`（含 logo、報價章、範例銀行匯款圖）, so that 直接寄給客戶。
+6. As 範例公司業務, I want 用瀏覽器列印 (Cmd+P) 存成乾淨 A4 PDF, so that 不需另裝工具就有 PDF。
+7. As 範例公司業務, I want 複製一張舊報價當新單起點, so that 類似報價秒開。
+8. As 範例公司業務, I want 改報價狀態（draft/sent/accepted/void）, so that 追蹤每張進度。
+9. As 範例公司業務, I want 報價單號自動 `YYYYMMDD-NN`（當日序號遞增、跨日歸零、併發不撞號）, so that 編號永遠唯一且有序。
+10. As 範例公司業務, I want 客戶資訊在建單當下快照進報價, so that 之後改客戶資料不會回頭竄改歷史報價。
+11. As 範例公司業務, I want 管理客戶（新增/編輯/刪除、選既有客戶帶入）, so that 不重複輸入常用客戶。
+12. As 範例公司老闆, I want 在 `/settings` 設定公司名/地址/電話/匯款/預設稅率/預設備註, so that 全站套用統一資訊。
 13. As Claude 使用者, I want 對話描述報價 → MCP `create_quote` 建單回我 view_url + xlsx_url, so that 不離開對話就開好單。
 14. As Claude 使用者, I want MCP 提供 `list_quotes`/`get_quote`/`list_clients`, so that 對話裡查得到既有資料。
 15. As Claude 使用者, I want 客戶名比對既有 clients、缺欄位用公司預設補, so that 只在真有歧義才被反問。
-16. As 開源自架者, I want clone 後出廠品牌全空白、無振禾資料, so that 不會誤把振禾資訊寄出去。
+16. As 開源自架者, I want clone 後出廠品牌全空白、無範例公司資料, so that 不會誤把範例公司資訊寄出去。
 17. As 開源自架者, I want 首次進站偵測未設定 → 顯示 setup 引導, so that 知道要先填公司+上傳素材。
 18. As 開源自架者, I want `seed-brand` CLI 一次推 logo/stamp/bank 到 R2 + 寫 key, so that 不想手點 web 也能初始化。
 19. As 開源自架者, I want README 說明 clone → 自己 CF → wrangler deploy → setup 全流程, so that 照著做就能上線。
@@ -88,7 +88,7 @@ Status: ready-for-agent
 ## Further Notes
 
 - **最大技術風險 = ExcelJS on Workers**（Node 相容性）。Slice 0 spike 為硬決策點，不通過即切 fflate 模板填充 fallback。
-- `reference/20260519_範例客戶_行銷_報價單.xlsx`（1.4M 振禾原稿）目前在 git → Slice 7 移到 `examples/`，評估 gitignore/LFS。
+- `reference/20260519_範例客戶_行銷_報價單.xlsx`（1.4M 範例公司原稿）目前在 git → Slice 7 移到 `examples/`，評估 gitignore/LFS。
 - 品牌色：金 `#B97E19`、灰 `#5D5B5A`、藍印章 `#004A85`；Noto Sans TC / Microsoft JhengHei；A4 大留白金線。
 - Cloudflare Access 需手動於 CF dashboard 設定（Slice 8 文件化）。
 - Secrets 走 1Password / env，repo/log/PR 禁明文。Git commit 身份 `zhenheco <ace@zhenhe-co.com>`。

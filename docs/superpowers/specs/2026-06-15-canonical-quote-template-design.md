@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-15
 **Status:** Approved direction (Design C), pending implementation-plan
-**Author:** Claude (Opus) for 振禾有限公司 / Quota
+**Author:** Claude (Opus) for 範例公司有限公司 / Quota
 
 ---
 
@@ -30,12 +30,12 @@ Reference renders already approved: `~/Downloads/報價單設計C_精緻金棕.p
 
 - Centered **serif「報 價 單」** title (Noto Serif TC 900, letter-spacing) + small `QUOTATION` eyebrow, centered logo above, gold underline accent.
 - Warm palette: `--gold:#A6791A`, ink `#2f2b27`, muted `#8c857b`, hairlines `#E7DEC9`.
-- Header bar: left **客戶 / 統一編號 / 聯絡人**; right **報價單號 / 報價日期** + seller block (振禾 名稱 / 統編 / 地址 / **聯絡人** / 電話).
+- Header bar: left **客戶 / 統一編號 / 聯絡人**; right **報價單號 / 報價日期** + seller block (範例公司 名稱 / 統編 / 地址 / **聯絡人** / 電話).
 - Gold-underlined centered **計畫名稱**.
 - Items table: gold top-rule header, columns **品項 / 內容 ｜ 數量 ｜ 單位 ｜ 單價 ｜ 金額** (no 項次 column in Design C — the numbered sub-points carry their own numbering); bold serif item name + numbered sub-points beneath.
 - Totals (right, dashed rows): 未稅小計 / 營業稅 N% / **總計（含稅）** in gold serif. Tax rows shown only when `tax_rate > 0`.
 - Notes box (warm tint) + 專案負責人 line.
-- Footer: 匯款資訊 (玉山 + 戶名) left; **報價專用章 stamp + 玉山存摺 image** right.
+- Footer: 匯款資訊 (範例銀行 + 戶名) left; **報價專用章 stamp + 範例銀行存摺 image** right.
 
 **Refinement vs mockup:** render the 9 sub-points as a **single-column** numbered list (the 2-column mockup wrapped awkwardly, e.g.「紀錄格／式」). One line item with 9 points fits A4 single-column cleanly.
 

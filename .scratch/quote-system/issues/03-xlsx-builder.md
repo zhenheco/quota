@@ -9,7 +9,7 @@ Type: AFK
 
 ## What to build
 
-伺服器端產報價 xlsx 的深模組 `generateQuoteXlsx(quote, items, company, brand) -> ArrayBuffer`，web 與 MCP 兩條路徑共用。依 Slice 01 spike 結論用 ExcelJS `writeBuffer()`（或 fflate 模板填充 fallback）。版面對齊振禾原稿：合併抬頭、金色表頭填色+邊框、動態 N 列品項、總計區（小計/稅率/稅金/總計）、備註、嵌 logo（上）+ 報價章與玉山存摺（下）。數字格式 `#,##0`、日期格式化。品牌素材以 R2 取得的 arraybuffer 嵌入（來自 `src/server/brand.ts`）。
+伺服器端產報價 xlsx 的深模組 `generateQuoteXlsx(quote, items, company, brand) -> ArrayBuffer`，web 與 MCP 兩條路徑共用。依 Slice 01 spike 結論用 ExcelJS `writeBuffer()`（或 fflate 模板填充 fallback）。版面對齊範例公司原稿：合併抬頭、金色表頭填色+邊框、動態 N 列品項、總計區（小計/稅率/稅金/總計）、備註、嵌 logo（上）+ 報價章與範例銀行存摺（下）。數字格式 `#,##0`、日期格式化。品牌素材以 R2 取得的 arraybuffer 嵌入（來自 `src/server/brand.ts`）。
 
 ## Acceptance criteria
 

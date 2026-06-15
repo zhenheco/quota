@@ -6,7 +6,7 @@ Status: ready-for-agent
 
 ## Problem Statement
 
-振禾老闆用 Quota 開報價單給客戶。同一張報價單，**線上頁、編輯時的即時預覽、下載的 PDF 長得不一樣**（系統內有兩套版型），不一致、不專業。老闆已挑定要的版型（Design C「報 價 單」精緻金棕 editorial），希望以後網站生成的每張報價單線上＋PDF 永遠長這樣。另外賣方抬頭無法填「聯絡人」，政府計畫附件資訊不完整。
+範例公司老闆用 Quota 開報價單給客戶。同一張報價單，**線上頁、編輯時的即時預覽、下載的 PDF 長得不一樣**（系統內有兩套版型），不一致、不專業。老闆已挑定要的版型（Design C「報 價 單」精緻金棕 editorial），希望以後網站生成的每張報價單線上＋PDF 永遠長這樣。另外賣方抬頭無法填「聯絡人」，政府計畫附件資訊不完整。
 
 ## Solution
 
@@ -14,20 +14,20 @@ Status: ready-for-agent
 
 ## User Stories
 
-1. As 振禾老闆, I want 線上 `/q/[id]` 顯示 Design C 版型, so that 寄客戶連結看起來專業。
-2. As 振禾老闆, I want 下載 PDF 與線上頁像素一致 Design C, so that 不出現兩套樣子。
-3. As 振禾老闆, I want 編輯時右邊即時預覽即 Design C, so that 所見即所得。
-4. As 振禾老闆, I want `/settings` 填「賣方聯絡人」, so that 抬頭顯示範例負責人。
-5. As 振禾老闆, I want 抬頭顯示 名稱/統編/地址/聯絡人/電話, so that 政府附件資訊完整。
-6. As 振禾老闆, I want 稅率>0 顯示 未稅/營業稅 N%/含稅總計、稅率0 隱藏, so that 含稅與未稅都正確。
-7. As 振禾老闆, I want 品項顯示品名+多行說明（保留換行）, so that 9 點內容完整。
-8. As 振禾老闆, I want 新建（未存檔）單預覽也顯示 logo/印章/存摺, so that 建立過程就見完整版型。
-9. As 振禾老闆, I want 編輯品項（增删/數量/單價）預覽即時更新且版型不破, so that 預覽可靠。
-10. As 振禾老闆, I want 客戶統編空則該列隱藏, so that 無空白欄。
+1. As 範例公司老闆, I want 線上 `/q/[id]` 顯示 Design C 版型, so that 寄客戶連結看起來專業。
+2. As 範例公司老闆, I want 下載 PDF 與線上頁像素一致 Design C, so that 不出現兩套樣子。
+3. As 範例公司老闆, I want 編輯時右邊即時預覽即 Design C, so that 所見即所得。
+4. As 範例公司老闆, I want `/settings` 填「賣方聯絡人」, so that 抬頭顯示範例負責人。
+5. As 範例公司老闆, I want 抬頭顯示 名稱/統編/地址/聯絡人/電話, so that 政府附件資訊完整。
+6. As 範例公司老闆, I want 稅率>0 顯示 未稅/營業稅 N%/含稅總計、稅率0 隱藏, so that 含稅與未稅都正確。
+7. As 範例公司老闆, I want 品項顯示品名+多行說明（保留換行）, so that 9 點內容完整。
+8. As 範例公司老闆, I want 新建（未存檔）單預覽也顯示 logo/印章/存摺, so that 建立過程就見完整版型。
+9. As 範例公司老闆, I want 編輯品項（增删/數量/單價）預覽即時更新且版型不破, so that 預覽可靠。
+10. As 範例公司老闆, I want 客戶統編空則該列隱藏, so that 無空白欄。
 11. As 開發者, I want 線上頁與 PDF 共用同一 markup builder + 同一 CSS, so that 不再分歧。
 12. As 開發者, I want 加 `company.contact` 後既有測試/型別仍編過, so that 不破 CI。
-13. As 振禾老闆, I want 部署前備份 prod D1、部署後實機驗證, so that 不弄壞線上真實資料。
-14. As 振禾老闆, I want xlsx 維持原樣, so that 既有 Excel 流程不受影響。
+13. As 範例公司老闆, I want 部署前備份 prod D1、部署後實機驗證, so that 不弄壞線上真實資料。
+14. As 範例公司老闆, I want xlsx 維持原樣, so that 既有 Excel 流程不受影響。
 
 ## Implementation Decisions
 
