@@ -26,6 +26,7 @@ function makeCompany(): Company {
   return {
     id: 1,
     name: '範例客戶',
+    tax_id: '24536806',
     address: '台北市中山區南京東路一段 1 號',
     phone: '02-1234-5678',
     bank_info: '玉山銀行 808 / 1234-567-890123 / 範例客戶有限公司',
@@ -73,6 +74,7 @@ function makeQuote(items: QuoteItem[]): Quote {
     client_id: 1,
     client_name: '安可整合行銷',
     client_contact: '王小姐',
+    client_tax_id: '53536206',
     client_phone: '0912-345-678',
     subject: '行銷',
     quote_date: '2026-06-14',
@@ -131,6 +133,20 @@ function hasCellValue(worksheet: ExcelJS.Worksheet, expected: string): boolean {
   return found;
 }
 
+function hasCellTextContaining(worksheet: ExcelJS.Worksheet, expected: string): boolean {
+  let found = false;
+
+  worksheet.eachRow((row) => {
+    row.eachCell((cell) => {
+      if (String(cell.value ?? '').includes(expected)) {
+        found = true;
+      }
+    });
+  });
+
+  return found;
+}
+
 function findRowNumberByValue(worksheet: ExcelJS.Worksheet, expected: string): number {
   let rowNumber = 0;
 
@@ -177,6 +193,9 @@ describe('generateQuoteXlsx', () => {
     expect(hasCellValue(worksheet, '20260614-01')).toBe(true);
     expect(hasCellValue(worksheet, '行銷')).toBe(true);
     expect(hasCellValue(worksheet, '安可整合行銷')).toBe(true);
+    expect(hasCellValue(worksheet, '統編')).toBe(true);
+    expect(hasCellTextContaining(worksheet, '24536806')).toBe(true);
+    expect(hasCellValue(worksheet, '53536206')).toBe(true);
     expect(itemRows).toHaveLength(2);
     expect(itemRows[0].getCell(2).value).toBe('策略規劃');
     expect(itemRows[0].getCell(7).value).toBe(48000);

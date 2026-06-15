@@ -61,6 +61,7 @@ export function validateClientInput(payload: unknown): ClientValidationResult<Cl
     value: {
       name: name.trim(),
       contact: optionalString(payload.contact),
+      tax_id: optionalTaxId(payload.tax_id),
       phone: optionalString(payload.phone),
       email: optionalString(payload.email),
       address: optionalString(payload.address),
@@ -87,6 +88,10 @@ export function validateClientPatch(payload: unknown): ClientValidationResult<Cl
 
   if ('contact' in payload) {
     patch.contact = optionalString(payload.contact);
+  }
+
+  if ('tax_id' in payload) {
+    patch.tax_id = optionalTaxId(payload.tax_id);
   }
 
   if ('phone' in payload) {
@@ -118,4 +123,10 @@ function optionalString(value: unknown): string | null {
   }
 
   return typeof value === 'string' ? value : String(value);
+}
+
+function optionalTaxId(value: unknown): string | null {
+  const normalized = optionalString(value)?.trim() ?? '';
+
+  return normalized === '' ? null : normalized;
 }

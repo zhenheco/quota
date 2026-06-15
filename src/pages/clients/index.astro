@@ -55,6 +55,7 @@ const clients = await listClients(env);
         <input type="hidden" name="action" value="create" />
         <div class="field"><label>名稱</label><input name="name" required /></div>
         <div class="field"><label>聯絡人</label><input name="contact" /></div>
+        <div class="field"><label>統編</label><input name="tax_id" inputmode="numeric" /></div>
         <div class="field"><label>電話</label><input name="phone" /></div>
         <div class="field"><label>Email</label><input name="email" type="email" /></div>
         <div class="field field--wide"><label>地址</label><input name="address" /></div>
@@ -84,6 +85,7 @@ const clients = await listClients(env);
                     <input type="hidden" name="id" value={client.id} />
                     <div class="field"><label>名稱</label><input name="name" value={client.name} required /></div>
                     <div class="field"><label>聯絡人</label><input name="contact" value={client.contact ?? ''} /></div>
+                    <div class="field"><label>統編</label><input name="tax_id" value={client.tax_id ?? ''} inputmode="numeric" /></div>
                     <div class="field"><label>電話</label><input name="phone" value={client.phone ?? ''} /></div>
                     <div class="field"><label>Email</label><input name="email" type="email" value={client.email ?? ''} /></div>
                     <div class="field field--wide"><label>地址</label><input name="address" value={client.address ?? ''} /></div>

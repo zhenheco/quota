@@ -62,6 +62,7 @@ export function validateQuoteInput(payload: unknown): ValidationResult {
       client_id: optionalInteger(payload.client_id),
       client_name: optionalString(payload.client_name),
       client_contact: optionalString(payload.client_contact),
+      client_tax_id: optionalString(payload.client_tax_id),
       client_phone: optionalString(payload.client_phone),
       subject: subject.value,
       quote_date: quoteDate.value,

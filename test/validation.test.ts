@@ -5,6 +5,7 @@ function validPayload(): unknown {
   return {
     client_name: ' Acme Co. ',
     client_contact: ' Amy ',
+    client_tax_id: ' 24536806 ',
     client_phone: ' 0912-345-678 ',
     subject: ' Website build ',
     quote_date: '2026-06-14',
@@ -33,6 +34,7 @@ describe('validateQuoteInput', () => {
       value: {
         client_name: 'Acme Co.',
         client_contact: 'Amy',
+        client_tax_id: '24536806',
         client_phone: '0912-345-678',
         subject: 'Website build',
         quote_date: '2026-06-14',

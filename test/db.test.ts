@@ -9,7 +9,7 @@ async function resetDb(): Promise<void> {
     env.DB.prepare('DELETE FROM clients'),
     env.DB.prepare(
       `UPDATE company_profile
-       SET name = '', address = '', phone = '', bank_info = '', default_tax_rate = 0.05,
+       SET name = '', tax_id = '', address = '', phone = '', bank_info = '', default_tax_rate = 0.05,
            default_notes = '', logo_key = NULL, stamp_key = NULL, bank_image_key = NULL
        WHERE id = 1`
     ),
@@ -27,6 +27,7 @@ describe('companyRepo', () => {
     await expect(companies.get()).resolves.toMatchObject({
       id: 1,
       name: '',
+      tax_id: '',
       address: '',
       phone: '',
       bank_info: '',
@@ -36,6 +37,7 @@ describe('companyRepo', () => {
 
     await companies.update({
       name: '範例客戶',
+      tax_id: '24536806',
       phone: '02-1234-5678',
       default_tax_rate: 0.1,
       default_notes: 'Valid for 14 days.',
@@ -44,6 +46,7 @@ describe('companyRepo', () => {
     await expect(companies.get()).resolves.toMatchObject({
       id: 1,
       name: '範例客戶',
+      tax_id: '24536806',
       phone: '02-1234-5678',
       default_tax_rate: 0.1,
       default_notes: 'Valid for 14 days.',
@@ -62,6 +65,7 @@ describe('clientsRepo', () => {
     const created = await clients.create({
       name: 'Acme Co.',
       contact: 'Amy',
+      tax_id: '24536806',
       phone: '0912-345-678',
       email: 'amy@example.com',
       address: 'Taipei',
@@ -72,11 +76,13 @@ describe('clientsRepo', () => {
     await expect(clients.get(created.id)).resolves.toMatchObject({
       name: 'Acme Co.',
       contact: 'Amy',
+      tax_id: '24536806',
       phone: '0912-345-678',
     });
 
     const updated = await clients.update(created.id, {
       name: 'Acme Taiwan',
+      tax_id: '53536206',
       phone: '02-2222-3333',
     });
 
@@ -84,6 +90,7 @@ describe('clientsRepo', () => {
       id: created.id,
       name: 'Acme Taiwan',
       contact: 'Amy',
+      tax_id: '53536206',
       phone: '02-2222-3333',
     });
 
@@ -104,6 +111,7 @@ describe('quotesRepo', () => {
     const client = await clients.create({
       name: 'Client A',
       contact: 'Chris',
+      tax_id: '24536806',
       phone: '0911-111-111',
     });
 
@@ -128,6 +136,7 @@ describe('quotesRepo', () => {
       client_id: client.id,
       client_name: 'Client A',
       client_contact: 'Chris',
+      client_tax_id: '24536806',
       client_phone: '0911-111-111',
       subtotal: 6000,
       tax_amount: 300,
@@ -167,6 +176,7 @@ describe('quotesRepo', () => {
     const client = await clients.create({
       name: 'Original Client',
       contact: 'Olivia',
+      tax_id: '24536806',
       phone: '0900-000-001',
     });
 
@@ -183,12 +193,14 @@ describe('quotesRepo', () => {
     await clients.update(client.id, {
       name: 'Renamed Client',
       contact: 'Riley',
+      tax_id: '53536206',
       phone: '0900-000-002',
     });
 
     await expect(quotes.get(created.id)).resolves.toMatchObject({
       client_name: 'Original Client',
       client_contact: 'Olivia',
+      client_tax_id: '24536806',
       client_phone: '0900-000-001',
     });
   });

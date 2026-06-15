@@ -41,12 +41,13 @@ export function companyRepo(db: D1Database) {
       await db
         .prepare(
           `UPDATE company_profile
-           SET name = ?1, address = ?2, phone = ?3, bank_info = ?4, default_tax_rate = ?5,
-               default_notes = ?6, logo_key = ?7, stamp_key = ?8, bank_image_key = ?9
+           SET name = ?1, tax_id = ?2, address = ?3, phone = ?4, bank_info = ?5, default_tax_rate = ?6,
+               default_notes = ?7, logo_key = ?8, stamp_key = ?9, bank_image_key = ?10
            WHERE id = 1`
         )
         .bind(
           patch.name ?? current.name,
+          patch.tax_id ?? current.tax_id,
           patch.address ?? current.address,
           patch.phone ?? current.phone,
           patch.bank_info ?? current.bank_info,
@@ -73,12 +74,13 @@ export function clientsRepo(db: D1Database) {
       const now = new Date().toISOString();
       const result = await db
         .prepare(
-          `INSERT INTO clients (name, contact, phone, email, address, created_at, updated_at)
-           VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)`
+          `INSERT INTO clients (name, contact, tax_id, phone, email, address, created_at, updated_at)
+           VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)`
         )
         .bind(
           input.name,
           input.contact ?? null,
+          input.tax_id ?? null,
           input.phone ?? null,
           input.email ?? null,
           input.address ?? null,
@@ -100,12 +102,13 @@ export function clientsRepo(db: D1Database) {
       await db
         .prepare(
           `UPDATE clients
-           SET name = ?1, contact = ?2, phone = ?3, email = ?4, address = ?5, updated_at = ?6
-           WHERE id = ?7`
+           SET name = ?1, contact = ?2, tax_id = ?3, phone = ?4, email = ?5, address = ?6, updated_at = ?7
+           WHERE id = ?8`
         )
         .bind(
           patch.name ?? current.name,
           patch.contact ?? current.contact,
+          patch.tax_id ?? current.tax_id,
           patch.phone ?? current.phone,
           patch.email ?? current.email,
           patch.address ?? current.address,
@@ -203,16 +206,17 @@ export function quotesRepo(db: D1Database) {
         db
           .prepare(
             `UPDATE quotes
-             SET client_id = ?1, client_name = ?2, client_contact = ?3, client_phone = ?4,
-                 subject = ?5, quote_date = ?6, valid_until = ?7, tax_rate = ?8,
-                 subtotal = ?9, tax_amount = ?10, total = ?11, notes = ?12,
-                 created_via = ?13, xlsx_key = ?14, pdf_key = ?15, updated_at = ?16
-             WHERE id = ?17`
+             SET client_id = ?1, client_name = ?2, client_contact = ?3, client_tax_id = ?4, client_phone = ?5,
+                 subject = ?6, quote_date = ?7, valid_until = ?8, tax_rate = ?9,
+                 subtotal = ?10, tax_amount = ?11, total = ?12, notes = ?13,
+                 created_via = ?14, xlsx_key = ?15, pdf_key = ?16, updated_at = ?17
+             WHERE id = ?18`
           )
           .bind(
             input.client_id ?? null,
             client?.name ?? input.client_name ?? null,
             client?.contact ?? input.client_contact ?? null,
+            client?.tax_id ?? input.client_tax_id ?? null,
             client?.phone ?? input.client_phone ?? null,
             input.subject ?? null,
             input.quote_date,
@@ -268,16 +272,17 @@ export function quotesRepo(db: D1Database) {
         db
           .prepare(
             `UPDATE quotes
-             SET client_id = ?1, client_name = ?2, client_contact = ?3, client_phone = ?4,
-                 subject = ?5, quote_date = ?6, valid_until = ?7, tax_rate = ?8,
-                 subtotal = ?9, tax_amount = ?10, total = ?11, notes = ?12,
-                 created_via = ?13, updated_at = ?14
-             WHERE id = ?15`
+             SET client_id = ?1, client_name = ?2, client_contact = ?3, client_tax_id = ?4, client_phone = ?5,
+                 subject = ?6, quote_date = ?7, valid_until = ?8, tax_rate = ?9,
+                 subtotal = ?10, tax_amount = ?11, total = ?12, notes = ?13,
+                 created_via = ?14, updated_at = ?15
+             WHERE id = ?16`
           )
           .bind(
             input.client_id ?? null,
             client?.name ?? input.client_name ?? null,
             client?.contact ?? input.client_contact ?? null,
+            client?.tax_id ?? input.client_tax_id ?? null,
             client?.phone ?? input.client_phone ?? null,
             input.subject ?? null,
             input.quote_date,

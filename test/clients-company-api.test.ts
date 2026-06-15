@@ -13,7 +13,7 @@ async function resetDb(): Promise<void> {
     env.DB.prepare('DELETE FROM clients'),
     env.DB.prepare(
       `UPDATE company_profile
-       SET name = '', address = '', phone = '', bank_info = '', default_tax_rate = 0.05,
+       SET name = '', tax_id = '', address = '', phone = '', bank_info = '', default_tax_rate = 0.05,
            default_notes = '', logo_key = NULL, stamp_key = NULL, bank_image_key = NULL
        WHERE id = 1`
     ),
@@ -24,6 +24,7 @@ function clientPayload(overrides: Record<string, unknown> = {}): Record<string, 
   return {
     name: '安可整合行銷',
     contact: '王小姐',
+    tax_id: '24536806',
     phone: '0912-345-678',
     email: 'hello@example.com',
     address: '台北市中山區南京東路一段 1 號',
@@ -58,6 +59,7 @@ describe('clients API routes', () => {
     expect(createBody.client).toMatchObject({
       id: expect.any(Number),
       name: '安可整合行銷',
+      tax_id: '24536806',
       phone: '0912-345-678',
     });
 
@@ -69,6 +71,7 @@ describe('clients API routes', () => {
       expect.objectContaining({
         id: createdClient.id,
         name: '安可整合行銷',
+        tax_id: '24536806',
       }),
     ]);
 
@@ -79,6 +82,7 @@ describe('clients API routes', () => {
     expect(readBody.client).toMatchObject({
       id: createdClient.id,
       contact: '王小姐',
+      tax_id: '24536806',
     });
 
     const updateResponse = await updateClient(
@@ -87,7 +91,7 @@ describe('clients API routes', () => {
         {
           method: 'PUT',
           headers: authHeaders(),
-          body: JSON.stringify({ name: '範例客戶', phone: '02-1234-5678' }),
+          body: JSON.stringify({ name: '範例客戶', tax_id: '53536206', phone: '02-1234-5678' }),
         },
         { id }
       )
@@ -97,6 +101,7 @@ describe('clients API routes', () => {
     expect(updateResponse.status).toBe(200);
     expect(updateBody.client).toMatchObject({
       name: '範例客戶',
+      tax_id: '53536206',
       phone: '02-1234-5678',
       email: 'hello@example.com',
     });
@@ -127,6 +132,7 @@ describe('clients API routes', () => {
     const client = await clientsRepo(env.DB).create({
       name: '安可整合行銷',
       contact: '王小姐',
+      tax_id: '24536806',
       phone: '0912-345-678',
     });
     const quote = await quotesRepo(env.DB).create(
@@ -150,6 +156,7 @@ describe('clients API routes', () => {
       client_id: null,
       client_name: '安可整合行銷',
       client_contact: '王小姐',
+      client_tax_id: '24536806',
       client_phone: '0912-345-678',
     });
   });
@@ -174,6 +181,7 @@ describe('company API route', () => {
     expect(body.company).toMatchObject({
       id: 1,
       name: '',
+      tax_id: '',
       address: '',
       phone: '',
       bank_info: '',
@@ -190,7 +198,7 @@ describe('company API route', () => {
       context('/api/company', {
         method: 'PUT',
         headers: authHeaders(),
-        body: JSON.stringify({ name: '範例客戶', bank_info: '玉山銀行 808 / 1234' }),
+        body: JSON.stringify({ name: '範例客戶', tax_id: '24536806', bank_info: '玉山銀行 808 / 1234' }),
       })
     );
     const updateBody = await json(updateResponse);
@@ -198,6 +206,7 @@ describe('company API route', () => {
     expect(updateResponse.status).toBe(200);
     expect(updateBody.company).toMatchObject({
       name: '範例客戶',
+      tax_id: '24536806',
       address: '',
       phone: '',
       bank_info: '玉山銀行 808 / 1234',

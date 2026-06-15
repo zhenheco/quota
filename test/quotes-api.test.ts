@@ -15,7 +15,7 @@ async function resetDb(): Promise<void> {
     env.DB.prepare('DELETE FROM clients'),
     env.DB.prepare(
       `UPDATE company_profile
-       SET name = '範例客戶', address = '台北市中山區南京東路一段 1 號',
+       SET name = '範例客戶', tax_id = '24536806', address = '台北市中山區南京東路一段 1 號',
            phone = '02-1234-5678',
            bank_info = '玉山銀行 808 / 1234-567-890123 / 範例客戶有限公司',
            default_tax_rate = 0.05, default_notes = '匯款後請提供末五碼。',
@@ -29,6 +29,7 @@ function quotePayload(overrides: Record<string, unknown> = {}): Record<string, u
   return {
     client_name: '安可整合行銷',
     client_contact: '王小姐',
+    client_tax_id: '53536206',
     client_phone: '0912-345-678',
     subject: '行銷',
     quote_date: '2026-06-14',
@@ -145,6 +146,7 @@ describe('quotes API routes', () => {
     expect(readBody.quote).toMatchObject({
       id: created.id,
       subject: '行銷',
+      client_tax_id: '53536206',
       items: [expect.objectContaining({ name: '策略規劃' })],
     });
 

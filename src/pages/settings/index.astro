@@ -77,6 +77,10 @@ const settingsView = createSettingsView(company);
         <label for="phone">電話</label>
         <input id="phone" name="phone" value={company.phone ?? ''} />
       </div>
+      <div class="field">
+        <label for="tax_id">統編</label>
+        <input id="tax_id" name="tax_id" value={company.tax_id} inputmode="numeric" />
+      </div>
       <div class="field field--wide">
         <label for="address">地址</label>
         <input id="address" name="address" value={company.address ?? ''} />

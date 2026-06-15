@@ -23,6 +23,9 @@ const view = createQuoteDocumentView({ quote, company });
         {view.companyAddress && view.companyPhone && ' / '}
         <span data-preview="companyPhone">{view.companyPhone}</span>
       </p>
+      <p class="muted" data-preview-optional="companyTaxId" hidden={!view.companyTaxId}>
+        統編 <span data-preview="companyTaxId">{view.companyTaxId}</span>
+      </p>
     </div>
     <div class="quote-meta">
       <div><span>報價單號</span><strong data-preview="quoteNo">{view.quoteNo}</strong></div>
@@ -39,6 +42,9 @@ const view = createQuoteDocumentView({ quote, company });
         <span data-preview="clientContact">{view.clientContact}</span>
         {view.clientContact && view.clientPhone && ' / '}
         <span data-preview="clientPhone">{view.clientPhone}</span>
+      </p>
+      <p data-preview-optional="clientTaxId" hidden={!view.clientTaxId}>
+        統編 <span data-preview="clientTaxId">{view.clientTaxId}</span>
       </p>
     </div>
     <div>

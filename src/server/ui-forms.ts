@@ -22,6 +22,7 @@ export function quoteInputFromForm(data: FormData): ValidationResult {
     client_id: optionalInteger(data.get('client_id')),
     client_name: stringValue(data.get('client_name')),
     client_contact: stringValue(data.get('client_contact')),
+    client_tax_id: stringValue(data.get('client_tax_id')),
     client_phone: stringValue(data.get('client_phone')),
     subject: stringValue(data.get('subject')),
     quote_date: stringValue(data.get('quote_date')),
@@ -37,6 +38,7 @@ export function clientInputFromForm(data: FormData): ClientInput {
   return {
     name: requiredString(data.get('name')),
     contact: stringValue(data.get('contact')),
+    tax_id: stringValue(data.get('tax_id')),
     phone: stringValue(data.get('phone')),
     email: stringValue(data.get('email')),
     address: stringValue(data.get('address')),
@@ -50,6 +52,7 @@ export function clientPatchFromForm(data: FormData): ClientPatch {
 export function companyPatchFromForm(data: FormData): CompanyPatch {
   return {
     name: requiredString(data.get('name')),
+    tax_id: stringValue(data.get('tax_id')) ?? '',
     address: stringValue(data.get('address')),
     phone: stringValue(data.get('phone')),
     bank_info: stringValue(data.get('bank_info')),

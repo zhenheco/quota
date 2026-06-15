@@ -20,10 +20,12 @@ export interface QuoteDocumentView {
   companyName: string;
   companyAddress: string;
   companyPhone: string;
+  companyTaxId: string;
   quoteNo: string;
   subject: string;
   clientName: string;
   clientContact: string;
+  clientTaxId: string;
   clientPhone: string;
   quoteDate: string;
   validUntil: string;
@@ -44,10 +46,12 @@ export function createQuoteDocumentView({ quote, company }: QuoteDocumentViewInp
     companyName: fallback(company.name, '公司名稱'),
     companyAddress: fallback(company.address, ''),
     companyPhone: fallback(company.phone, ''),
+    companyTaxId: fallback(company.tax_id, ''),
     quoteNo: quote.quote_no,
     subject: fallback(quote.subject, '報價單'),
     clientName: fallback(quote.client_name, '未指定客戶'),
     clientContact: fallback(quote.client_contact, ''),
+    clientTaxId: fallback(quote.client_tax_id, ''),
     clientPhone: fallback(quote.client_phone, ''),
     quoteDate: fallback(quote.quote_date, ''),
     validUntil: fallback(quote.valid_until, ''),

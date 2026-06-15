@@ -34,6 +34,10 @@ export function validateCompanyPatch(payload: unknown): CompanyValidationResult 
     patch.name = payload.name;
   }
 
+  if ('tax_id' in payload) {
+    patch.tax_id = optionalTaxId(payload.tax_id);
+  }
+
   for (const field of ['address', 'phone', 'bank_info', 'default_notes'] as const) {
     if (field in payload) {
       patch[field] = optionalString(payload[field]);
@@ -67,4 +71,10 @@ function optionalString(value: unknown): string | null {
   }
 
   return typeof value === 'string' ? value : String(value);
+}
+
+function optionalTaxId(value: unknown): string {
+  const normalized = optionalString(value)?.trim() ?? '';
+
+  return normalized;
 }

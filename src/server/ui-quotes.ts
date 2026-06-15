@@ -28,6 +28,7 @@ export function editableQuote(company: Company, quote?: Quote | null): Quote {
     client_id: null,
     client_name: '',
     client_contact: '',
+    client_tax_id: '',
     client_phone: '',
     subject: '',
     quote_date: today,

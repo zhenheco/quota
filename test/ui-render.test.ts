@@ -6,6 +6,7 @@ import type { Company, Quote } from '../src/server/types';
 const company: Company = {
   id: 1,
   name: '範例客戶',
+  tax_id: '24536806',
   address: '台北市中山區南京東路一段 1 號',
   phone: '02-1234-5678',
   bank_info: '玉山銀行 808 / 1234-567-890123 / 範例客戶有限公司',
@@ -22,6 +23,7 @@ const quote: Quote = {
   client_id: null,
   client_name: '安可整合行銷',
   client_contact: '王小姐',
+  client_tax_id: '53536206',
   client_phone: '0912-345-678',
   subject: '品牌策略規劃',
   quote_date: '2026-06-14',
@@ -58,6 +60,8 @@ describe('QuoteDocument', () => {
 
     expect(view.sheetClass).toBe('quotation-sheet');
     expect(view.quoteNo).toBe('20260614-01');
+    expect(view.companyTaxId).toBe('24536806');
+    expect(view.clientTaxId).toBe('53536206');
     expect(view.items).toEqual([
       expect.objectContaining({
         name: '策略規劃',

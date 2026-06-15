@@ -34,7 +34,7 @@ Configure `QUOTA_API_URL` and `QUOTA_API_TOKEN` in the MCP server environment us
 
 ## Tools
 
-- `create_quote`: creates a quote, applies company defaults for omitted `tax_rate` and `notes`, and matches a string client name against existing clients.
+- `create_quote`: creates a quote, applies company defaults for omitted `tax_rate` and `notes`, accepts optional `client.tax_id`, and matches a string client name against existing clients.
 - `list_quotes`: lists quotes with optional `status`, `client`, and `date` filters.
 - `get_quote`: reads one quote by id.
 - `list_clients`: lists clients.

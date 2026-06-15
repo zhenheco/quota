@@ -33,6 +33,16 @@ function setPreview(name: string, value: string): void {
   }
 }
 
+function setOptionalPreview(name: string, value: string): void {
+  setPreview(name, value);
+
+  const row = editor?.querySelector<HTMLElement>(`[data-preview-optional="${name}"]`) ?? null;
+
+  if (row) {
+    row.hidden = value.trim() === '';
+  }
+}
+
 function itemRows(): HTMLElement[] {
   return Array.from(editor?.querySelectorAll<HTMLElement>('.item-row') ?? []);
 }
@@ -94,6 +104,7 @@ function syncClientFromSelect(): void {
 
   const clientName = field('client_name');
   const clientContact = field('client_contact');
+  const clientTaxId = field('client_tax_id');
   const clientPhone = field('client_phone');
 
   if (clientName) {
@@ -101,6 +112,9 @@ function syncClientFromSelect(): void {
   }
   if (clientContact) {
     clientContact.value = option.dataset.contact ?? '';
+  }
+  if (clientTaxId) {
+    clientTaxId.value = option.dataset.taxId ?? '';
   }
   if (clientPhone) {
     clientPhone.value = option.dataset.phone ?? '';
@@ -116,6 +130,7 @@ function updatePreview(): void {
   setPreview('subject', field('subject')?.value || '報價單');
   setPreview('clientName', field('client_name')?.value || '未指定客戶');
   setPreview('clientContact', field('client_contact')?.value || '');
+  setOptionalPreview('clientTaxId', field('client_tax_id')?.value || '');
   setPreview('clientPhone', field('client_phone')?.value || '');
   setPreview('quoteDate', field('quote_date')?.value || '');
   setPreview('validUntil', field('valid_until')?.value || '');

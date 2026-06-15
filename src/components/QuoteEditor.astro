@@ -28,6 +28,7 @@ const { quote, company, clients, submitLabel, error } = Astro.props;
                 selected={quote.client_id === client.id}
                 data-name={client.name}
                 data-contact={client.contact ?? ''}
+                data-tax-id={client.tax_id ?? ''}
                 data-phone={client.phone ?? ''}
               >
                 {client.name}
@@ -47,6 +48,10 @@ const { quote, company, clients, submitLabel, error } = Astro.props;
       <div class="field">
         <label for="client_contact">聯絡人</label>
         <input id="client_contact" name="client_contact" value={quote.client_contact ?? ''} />
+      </div>
+      <div class="field">
+        <label for="client_tax_id">統編</label>
+        <input id="client_tax_id" name="client_tax_id" value={quote.client_tax_id ?? ''} inputmode="numeric" />
       </div>
       <div class="field">
         <label for="client_phone">客戶電話</label>

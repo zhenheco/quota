@@ -104,7 +104,7 @@ function buildHeader(worksheet: ExcelJS.Worksheet, input: QuoteXlsxInput): void 
     alignment: { vertical: 'middle' },
   });
   setCell(worksheet, 'D2', input.company.address ?? '', baseTextStyle());
-  setCell(worksheet, 'D3', input.company.phone ? `電話 ${input.company.phone}` : '', baseTextStyle());
+  setCell(worksheet, 'D3', companyMeta(input.company), baseTextStyle());
   setCell(worksheet, 'F1', '報價單', {
     font: { size: 24, bold: true, color: { argb: GOLD } },
     alignment: { horizontal: 'right', vertical: 'middle' },
@@ -123,6 +123,7 @@ function buildHeader(worksheet: ExcelJS.Worksheet, input: QuoteXlsxInput): void 
   setLabelValue(worksheet, 6, 1, '客戶名稱', input.quote.client_name ?? '');
   setLabelValue(worksheet, 7, 1, '聯絡人', input.quote.client_contact ?? '');
   setLabelValue(worksheet, 8, 1, '電話', input.quote.client_phone ?? '');
+  setOptionalLabelValue(worksheet, 9, 1, '統編', input.quote.client_tax_id);
   setLabelValue(worksheet, 6, 5, '報價單號', input.quote.quote_no);
   setLabelValue(worksheet, 7, 5, '報價日期', formatDate(input.quote.quote_date));
   setLabelValue(worksheet, 8, 5, '有效期限', formatDate(input.quote.valid_until));
@@ -284,6 +285,31 @@ function setLabelValue(worksheet: ExcelJS.Worksheet, rowNumber: number, labelCol
   valueCell.value = value;
   labelCell.style = labelStyle();
   valueCell.style = baseTextStyle();
+}
+
+function setOptionalLabelValue(
+  worksheet: ExcelJS.Worksheet,
+  rowNumber: number,
+  labelColumn: number,
+  label: string,
+  value: string | null | undefined
+): void {
+  const normalized = value?.trim() ?? '';
+
+  if (normalized === '') {
+    return;
+  }
+
+  setLabelValue(worksheet, rowNumber, labelColumn, label, normalized);
+}
+
+function companyMeta(company: Company): string {
+  return [
+    company.phone ? `電話 ${company.phone}` : '',
+    company.tax_id.trim() === '' ? '' : `統編 ${company.tax_id}`,
+  ]
+    .filter((value) => value !== '')
+    .join(' / ');
 }
 
 function addDivider(worksheet: ExcelJS.Worksheet, rowNumber: number): void {

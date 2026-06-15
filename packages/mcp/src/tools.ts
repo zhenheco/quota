@@ -14,6 +14,7 @@ const clientInputSchema = z.union([
   z.object({
     name: z.string().min(1),
     contact: z.string().nullish(),
+    tax_id: z.string().nullish(),
     phone: z.string().nullish(),
   }),
 ]);
@@ -161,6 +162,7 @@ function clientFields(input: CreateQuoteInput['client'], clients: Client[]): Par
     return omitUndefined({
       client_name: input.name,
       client_contact: input.contact ?? undefined,
+      client_tax_id: input.tax_id ?? undefined,
       client_phone: input.phone ?? undefined,
     });
   }
@@ -173,6 +175,7 @@ function clientFields(input: CreateQuoteInput['client'], clients: Client[]): Par
       client_id: matched.id,
       client_name: matched.name,
       client_contact: matched.contact,
+      client_tax_id: matched.tax_id,
       client_phone: matched.phone,
     });
   }

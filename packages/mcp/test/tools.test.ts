@@ -114,6 +114,7 @@ describe('create_quote tool', () => {
               id: 7,
               name: 'Acme',
               contact: 'Amy',
+              tax_id: '24536806',
               phone: '0912-345-678',
               email: null,
               address: null,
@@ -143,6 +144,7 @@ describe('create_quote tool', () => {
       client_id: 7,
       client_name: 'Acme',
       client_contact: 'Amy',
+      client_tax_id: '24536806',
       client_phone: '0912-345-678',
       subject: 'Strategy',
       quote_date: '2026-06-14',
@@ -204,6 +206,53 @@ describe('create_quote tool', () => {
       notes: 'Custom note',
     });
     expect(body).not.toHaveProperty('client_id');
+  });
+
+  it('passes explicit client tax_id through for chat-created quotes', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json({
+          company: {
+            id: 1,
+            name: 'Quota Co',
+            address: null,
+            phone: null,
+            bank_info: null,
+            default_tax_rate: 0.05,
+            default_notes: null,
+            logo_key: null,
+            stamp_key: null,
+            bank_image_key: null,
+          },
+        })
+      )
+      .mockResolvedValueOnce(Response.json({ clients: [] }))
+      .mockResolvedValueOnce(
+        Response.json({
+          id: 14,
+          quote_no: '20260614-03',
+          view_url: '/q/14',
+          xlsx_url: '/api/quotes/14/xlsx',
+        })
+      );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const api = createApiClient({ baseUrl: 'https://quota.example.workers.dev', token: 'machine-token' });
+    await createQuotaTools(api).create_quote.handler({
+      client: {
+        name: 'New Co',
+        tax_id: '53536206',
+      },
+      subject: 'Website',
+      quote_date: '2026-06-14',
+      items: [{ name: 'Build', qty: 1, unit_price: 5000 }],
+    });
+
+    expect(JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body))).toMatchObject({
+      client_name: 'New Co',
+      client_tax_id: '53536206',
+    });
   });
 });
 

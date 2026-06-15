@@ -15,6 +15,7 @@ export interface QuoteTotals {
 export interface Company {
   id: 1;
   name: string;
+  tax_id: string;
   address: string | null;
   phone: string | null;
   bank_info: string | null;
@@ -30,6 +31,7 @@ export type CompanyPatch = Partial<Omit<Company, 'id'>>;
 export interface ClientInput {
   name: string;
   contact?: string | null;
+  tax_id?: string | null;
   phone?: string | null;
   email?: string | null;
   address?: string | null;
@@ -54,6 +56,7 @@ export interface QuoteCreateInput {
   client_id?: number | null;
   client_name?: string | null;
   client_contact?: string | null;
+  client_tax_id?: string | null;
   client_phone?: string | null;
   subject?: string | null;
   quote_date: string;
@@ -88,6 +91,7 @@ export interface Quote {
   client_id: number | null;
   client_name: string | null;
   client_contact: string | null;
+  client_tax_id: string | null;
   client_phone: string | null;
   subject: string | null;
   quote_date: string | null;
