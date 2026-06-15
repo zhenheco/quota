@@ -1,15 +1,17 @@
 name = "quota"
-# workers.dev disabled: only the Access-gated custom domain (quote24.cc) serves,
-# so the open *.workers.dev URL can't bypass Cloudflare Access.
+# workers.dev disabled: only the Access-gated custom domain serves, so the open
+# *.workers.dev URL can't bypass Cloudflare Access. (Set to true if you want the
+# workers.dev URL — then also gate it, or rely on app-level auth.)
 workers_dev = false
 # Deploy uses Astro-generated dist/server/wrangler.json (run `pnpm build` then
 # `wrangler deploy -c dist/server/wrangler.json`). This root config supplies the
 # bindings the adapter merges in. Binding names are stable: DB (D1), FILES (R2), SESSION (KV).
 #
-# SELF-HOSTERS: the ids below are the maintainer's resources. Replace them with your
-# own after `wrangler d1 create quota`, `wrangler r2 bucket create quota-files`,
-# `wrangler kv namespace create quota-session`. Resource ids are not secrets, but they
-# point at the maintainer's account — your deploy must use yours. See DEPLOY.md.
+# SELF-HOSTERS: replace the placeholder ids below with your own:
+#   wrangler d1 create quota                  -> database_id
+#   wrangler kv namespace create quota-session -> SESSION id
+#   wrangler r2 bucket create quota-files      (bucket name can stay "quota-files")
+# Resource ids are not secrets, but they point at a specific account. See DEPLOY.md.
 compatibility_date = "2026-06-12"
 compatibility_flags = ["nodejs_compat"]
 
@@ -20,7 +22,7 @@ directory = "./dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "quota"
-database_id = "43fb8040-cca2-4da4-b9bf-e456a6755922"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
 migrations_dir = "migrations"
 
 [[r2_buckets]]
@@ -32,4 +34,4 @@ binding = "BROWSER"
 
 [[kv_namespaces]]
 binding = "SESSION"
-id = "db327ea7a9734fceac91aa806125a3ba"
+id = "REPLACE_WITH_YOUR_SESSION_KV_ID"
