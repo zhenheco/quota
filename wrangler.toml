@@ -1,5 +1,7 @@
 name = "quota"
-workers_dev = true
+# workers.dev disabled: only the Access-gated custom domain (quote24.cc) serves,
+# so the open *.workers.dev URL can't bypass Cloudflare Access.
+workers_dev = false
 # Deploy uses Astro-generated dist/server/wrangler.json (run `pnpm build` then
 # `wrangler deploy -c dist/server/wrangler.json`). This root config supplies the
 # bindings the adapter merges in. Binding names are stable: DB (D1), FILES (R2), SESSION (KV).
