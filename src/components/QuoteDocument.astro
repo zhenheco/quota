@@ -84,7 +84,9 @@ const view = createQuoteDocumentView({ quote, company });
 
   <section class="document-section totals">
     <div><span>未稅小計</span><strong data-preview="subtotal">{view.subtotalLabel}</strong></div>
-    <div><span>營業稅 <span data-preview="taxRate">{view.taxRateLabel}</span></span><strong data-preview="taxAmount">{view.taxAmountLabel}</strong></div>
+    <div data-preview-tax-row hidden={!view.showTaxRows}>
+      <span>營業稅 <span data-preview="taxRate">{view.taxRateLabel}</span></span><strong data-preview="taxAmount">{view.taxAmountLabel}</strong>
+    </div>
     <div class="grand"><span>總計</span><strong data-preview="total">{view.totalLabel}</strong></div>
   </section>
 

@@ -65,8 +65,8 @@ function makeItems(count: number): QuoteItem[] {
   }));
 }
 
-function makeQuote(items: QuoteItem[]): Quote {
-  const totals = computeTotals(items, 0.05);
+function makeQuote(items: QuoteItem[], taxRate = 0.05): Quote {
+  const totals = computeTotals(items, taxRate);
 
   return {
     id: 1,
@@ -79,7 +79,7 @@ function makeQuote(items: QuoteItem[]): Quote {
     subject: '行銷',
     quote_date: '2026-06-14',
     valid_until: '2026-06-30',
-    tax_rate: 0.05,
+    tax_rate: taxRate,
     subtotal: totals.subtotal,
     tax_amount: totals.taxAmount,
     total: totals.total,
@@ -102,9 +102,9 @@ function makeBrand(): { logo: ArrayBuffer; stamp: ArrayBuffer; bank: ArrayBuffer
   };
 }
 
-async function loadQuoteWorksheet(items: QuoteItem[]): Promise<ExcelJS.Worksheet> {
+async function loadQuoteWorksheet(items: QuoteItem[], taxRate = 0.05): Promise<ExcelJS.Worksheet> {
   const bytes = await generateQuoteXlsx({
-    quote: makeQuote(items),
+    quote: makeQuote(items, taxRate),
     items,
     company: makeCompany(),
     brand: makeBrand(),
@@ -205,6 +205,20 @@ describe('generateQuoteXlsx', () => {
     expectTotalValue(worksheet, '總計', totals.total);
     expect(worksheet.getImages()).toHaveLength(3);
     expect(itemRows[0].getCell(7).numFmt).toContain('#,##0');
+  });
+
+  it('omits tax rows for untaxed quotes and keeps total equal to subtotal', async () => {
+    const items = makeItems(2);
+    const totals = computeTotals(items, 0);
+    const worksheet = await loadQuoteWorksheet(items, 0);
+    const subtotalRowNumber = findRowNumberByValue(worksheet, '小計');
+    const totalRowNumber = findRowNumberByValue(worksheet, '總計');
+
+    expectTotalValue(worksheet, '小計', totals.subtotal);
+    expect(findRowNumberByValue(worksheet, '稅率')).toBe(0);
+    expect(findRowNumberByValue(worksheet, '稅金')).toBe(0);
+    expect(totalRowNumber).toBe(subtotalRowNumber + 1);
+    expectTotalValue(worksheet, '總計', totals.subtotal);
   });
 
   it('uses one item row when the quote has one item', async () => {

@@ -52,8 +52,7 @@ export async function generateQuoteXlsx(input: QuoteXlsxInput): Promise<Uint8Arr
   buildHeader(worksheet, input);
   const tableStartRow = buildItemsTable(worksheet, input.items);
   const totalsStartRow = tableStartRow + input.items.length + 1;
-  buildTotals(worksheet, input.quote, totalsStartRow);
-  const footerStartRow = totalsStartRow + 5;
+  const footerStartRow = buildTotals(worksheet, input.quote, totalsStartRow) + 1;
   configureColumns(worksheet, footerStartRow + 9);
   buildFooter(worksheet, input, footerStartRow);
   addBrandImages(workbook, worksheet, input.brand, footerStartRow);
@@ -182,11 +181,22 @@ function buildItemsTable(worksheet: ExcelJS.Worksheet, items: QuoteItem[]): numb
   return headerRowNumber;
 }
 
-function buildTotals(worksheet: ExcelJS.Worksheet, quote: Quote, startRow: number): void {
+function buildTotals(worksheet: ExcelJS.Worksheet, quote: Quote, startRow: number): number {
+  const showTaxRows = quote.tax_rate > 0;
+
   setTotalRow(worksheet, startRow, '小計', quote.subtotal, false);
-  setTotalRow(worksheet, startRow + 1, '稅率', quote.tax_rate, false, '0%');
-  setTotalRow(worksheet, startRow + 2, '稅金', quote.tax_amount, false);
-  setTotalRow(worksheet, startRow + 3, '總計', quote.total, true);
+
+  if (showTaxRows) {
+    setTotalRow(worksheet, startRow + 1, '稅率', quote.tax_rate, false, '0%');
+    setTotalRow(worksheet, startRow + 2, '稅金', quote.tax_amount, false);
+    setTotalRow(worksheet, startRow + 3, '總計', quote.total, true);
+
+    return startRow + 4;
+  }
+
+  setTotalRow(worksheet, startRow + 1, '總計', quote.total, true);
+
+  return startRow + 2;
 }
 
 function setTotalRow(

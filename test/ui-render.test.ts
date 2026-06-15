@@ -70,6 +70,21 @@ describe('QuoteDocument', () => {
     ]);
     expect(view.totalLabel).toBe('100,800');
   });
+
+  it('marks tax rows hidden for untaxed quote documents', () => {
+    const view = createQuoteDocumentView({
+      quote: {
+        ...quote,
+        tax_rate: 0,
+        tax_amount: 0,
+        total: quote.subtotal,
+      },
+      company,
+    });
+
+    expect(view.showTaxRows).toBe(false);
+    expect(view.totalLabel).toBe('96,000');
+  });
 });
 
 describe('settings view', () => {

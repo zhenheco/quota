@@ -31,6 +31,7 @@ export interface QuoteDocumentView {
   validUntil: string;
   items: QuoteDocumentItemView[];
   subtotalLabel: string;
+  showTaxRows: boolean;
   taxRateLabel: string;
   taxAmountLabel: string;
   totalLabel: string;
@@ -64,6 +65,7 @@ export function createQuoteDocumentView({ quote, company }: QuoteDocumentViewInp
       amountLabel: formatMoney(Math.round(item.qty * item.unit_price)),
     })),
     subtotalLabel: formatMoney(totals.subtotal),
+    showTaxRows: quote.tax_rate > 0,
     taxRateLabel: `${Math.round(quote.tax_rate * 1000) / 10}%`,
     taxAmountLabel: formatMoney(totals.taxAmount),
     totalLabel: formatMoney(totals.total),

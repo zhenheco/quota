@@ -43,6 +43,14 @@ function setOptionalPreview(name: string, value: string): void {
   }
 }
 
+function setTaxRowVisibility(showTaxRows: boolean): void {
+  const row = editor?.querySelector<HTMLElement>('[data-preview-tax-row]') ?? null;
+
+  if (row) {
+    row.hidden = !showTaxRows;
+  }
+}
+
 function itemRows(): HTMLElement[] {
   return Array.from(editor?.querySelectorAll<HTMLElement>('.item-row') ?? []);
 }
@@ -136,6 +144,7 @@ function updatePreview(): void {
   setPreview('validUntil', field('valid_until')?.value || '');
   setPreview('notes', field('notes')?.value || '');
   setPreview('subtotal', money(totals.subtotal));
+  setTaxRowVisibility(normalizedTaxRate > 0);
   setPreview('taxRate', `${Math.round(normalizedTaxRate * 1000) / 10}%`);
   setPreview('taxAmount', money(totals.taxAmount));
   setPreview('total', money(totals.total));
