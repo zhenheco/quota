@@ -1,4 +1,9 @@
 import { computeTotals } from '../shared/calc';
+import {
+  formatMoney,
+  formatQuantity,
+  renderQuoteItemRows,
+} from '../shared/quote-document-template';
 
 interface PreviewItem {
   name: string;
@@ -11,11 +16,6 @@ interface PreviewItem {
 type FieldElement = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
 
 const editor = document.querySelector<HTMLElement>('[data-quote-editor]');
-const formatter = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 });
-
-function money(value: number): string {
-  return formatter.format(value);
-}
 
 function field(name: string): FieldElement | null {
   return editor?.querySelector(`[name="${name}"]`) as FieldElement | null;
@@ -44,11 +44,13 @@ function setOptionalPreview(name: string, value: string): void {
 }
 
 function setTaxRowVisibility(showTaxRows: boolean): void {
-  const row = editor?.querySelector<HTMLElement>('[data-preview-tax-row]') ?? null;
+  const rows = editor?.querySelectorAll<HTMLElement>(
+    '[data-preview-subtotal-row], [data-preview-tax-row]'
+  );
 
-  if (row) {
+  rows?.forEach((row) => {
     row.hidden = !showTaxRows;
-  }
+  });
 }
 
 function itemRows(): HTMLElement[] {
@@ -80,26 +82,16 @@ function renderItems(items: PreviewItem[]): void {
     return;
   }
 
-  body.innerHTML = items
-    .map(
-      (item) => `<tr>
-        <td>${escapeHtml(item.name)}</td>
-        <td>${escapeHtml(item.description)}</td>
-        <td class="num">${item.qty}</td>
-        <td>${escapeHtml(item.unit)}</td>
-        <td class="num">${money(item.unit_price)}</td>
-        <td class="num">${money(Math.round(item.qty * item.unit_price))}</td>
-      </tr>`
-    )
-    .join('');
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;');
+  body.innerHTML = renderQuoteItemRows(
+    items.map((item) => ({
+      name: item.name,
+      description: item.description,
+      qtyLabel: formatQuantity(item.qty),
+      unit: item.unit,
+      unitPriceLabel: formatMoney(item.unit_price),
+      amountLabel: formatMoney(Math.round(item.qty * item.unit_price)),
+    }))
+  );
 }
 
 function syncClientFromSelect(): void {
@@ -143,11 +135,11 @@ function updatePreview(): void {
   setPreview('quoteDate', field('quote_date')?.value || '');
   setPreview('validUntil', field('valid_until')?.value || '');
   setPreview('notes', field('notes')?.value || '');
-  setPreview('subtotal', money(totals.subtotal));
+  setPreview('subtotal', formatMoney(totals.subtotal));
   setTaxRowVisibility(normalizedTaxRate > 0);
   setPreview('taxRate', `${Math.round(normalizedTaxRate * 1000) / 10}%`);
-  setPreview('taxAmount', money(totals.taxAmount));
-  setPreview('total', money(totals.total));
+  setPreview('taxAmount', formatMoney(totals.taxAmount));
+  setPreview('total', formatMoney(totals.total));
   renderItems(items);
 }
 

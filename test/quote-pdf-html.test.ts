@@ -10,6 +10,7 @@ function makeCompany(): Company {
     tax_id: '24536806',
     address: '台北市中山區南京東路一段 1 號',
     phone: '02-1234-5678',
+    contact: '王小姐',
     bank_info: '玉山銀行 808 / 1234-567-890123 / 範例顧問有限公司',
     default_tax_rate: 0.05,
     default_notes: '匯款後請提供末五碼。',
@@ -66,27 +67,37 @@ function makeQuote(taxRate: number): Quote {
 }
 
 describe('buildQuoteHtml', () => {
-  it('renders shared quote document data and hides tax rows for untaxed quotes', () => {
+  it('renders Design C shell and keeps tax rows hidden for untaxed quotes', () => {
     const html = buildQuoteHtml({
       quote: makeQuote(0),
       company: makeCompany(),
       brand: {},
     });
 
+    expect(html).toContain('class="quote-sheet"');
+    expect(html).not.toContain('quotation-sheet');
+    expect(html).toContain('報 價 單');
+    expect(html).toContain('王小姐');
     expect(html).toContain('20260614-01');
     expect(html).toContain('安可整合行銷');
-    expect(html).toContain('統編 <span>53536206</span>');
-    expect(html).not.toContain('稅金');
+    expect(html).toContain('data-preview-subtotal-row hidden');
+    expect(html).toContain('data-preview-tax-row hidden');
+    expect(html).toContain('總計');
+    expect(html).not.toContain('總計（含稅）');
   });
 
-  it('shows tax rows for taxed quotes', () => {
+  it('shows Design C tax labels for taxed quotes', () => {
     const html = buildQuoteHtml({
       quote: makeQuote(0.05),
       company: makeCompany(),
       brand: {},
     });
 
-    expect(html).toContain('營業稅 <span>5%</span>');
-    expect(html).toContain('稅金');
+    expect(html).toContain('未稅小計');
+    expect(html).toContain('營業稅 <span data-preview="taxRate">5%</span>');
+    expect(html).toContain('總計');
+    expect(html).not.toContain('總計（含稅）');
+    expect(html).not.toContain('data-preview-subtotal-row hidden');
+    expect(html).not.toContain('data-preview-tax-row hidden');
   });
 });

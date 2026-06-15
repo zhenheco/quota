@@ -38,7 +38,7 @@ export function validateCompanyPatch(payload: unknown): CompanyValidationResult 
     patch.tax_id = optionalTaxId(payload.tax_id);
   }
 
-  for (const field of ['address', 'phone', 'bank_info', 'default_notes'] as const) {
+  for (const field of ['address', 'phone', 'contact', 'bank_info', 'default_notes'] as const) {
     if (field in payload) {
       patch[field] = optionalString(payload[field]);
     }

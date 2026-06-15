@@ -9,6 +9,7 @@ const company: Company = {
   tax_id: '24536806',
   address: '台北市中山區南京東路一段 1 號',
   phone: '02-1234-5678',
+  contact: '王小姐',
   bank_info: '玉山銀行 808 / 1234-567-890123 / 範例客戶有限公司',
   default_tax_rate: 0.05,
   default_notes: '匯款後請提供末五碼。',
@@ -58,9 +59,10 @@ describe('QuoteDocument', () => {
   it('prepares the shared A4 quote document data with quote number, items, and totals', () => {
     const view = createQuoteDocumentView({ quote, company });
 
-    expect(view.sheetClass).toBe('quotation-sheet');
+    expect(view.sheetClass).toBe('quote-sheet');
     expect(view.quoteNo).toBe('20260614-01');
     expect(view.companyTaxId).toBe('24536806');
+    expect(view.companyContact).toBe('王小姐');
     expect(view.clientTaxId).toBe('53536206');
     expect(view.items).toEqual([
       expect.objectContaining({

@@ -13,7 +13,7 @@ async function resetDb(): Promise<void> {
     env.DB.prepare('DELETE FROM clients'),
     env.DB.prepare(
       `UPDATE company_profile
-       SET name = '', tax_id = '', address = '', phone = '', bank_info = '', default_tax_rate = 0.05,
+       SET name = '', tax_id = '', address = '', phone = '', contact = '', bank_info = '', default_tax_rate = 0.05,
            default_notes = '', logo_key = NULL, stamp_key = NULL, bank_image_key = NULL
        WHERE id = 1`
     ),
@@ -184,6 +184,7 @@ describe('company API route', () => {
       tax_id: '',
       address: '',
       phone: '',
+      contact: '',
       bank_info: '',
       default_tax_rate: 0.05,
       default_notes: '',
@@ -219,6 +220,47 @@ describe('company API route', () => {
 
     expect(readResponse.status).toBe(200);
     expect(readBody.company).toMatchObject(updateBody.company as Record<string, unknown>);
+  });
+
+  it('persists company contact and preserves it when omitted from a later patch', async () => {
+    const updateResponse = await updateCompany(
+      context('/api/company', {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ name: '範例客戶', contact: '王小姐' }),
+      })
+    );
+    const updateBody = await json(updateResponse);
+
+    expect(updateResponse.status).toBe(200);
+    expect(updateBody.company).toMatchObject({
+      name: '範例客戶',
+      contact: '王小姐',
+    });
+
+    const readResponse = await getCompany(context('/api/company', { headers: authHeaders() }));
+    const readBody = await json(readResponse);
+
+    expect(readResponse.status).toBe(200);
+    expect(readBody.company).toMatchObject({
+      name: '範例客戶',
+      contact: '王小姐',
+    });
+
+    const patchResponse = await updateCompany(
+      context('/api/company', {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ phone: '02-1234-5678' }),
+      })
+    );
+    const patchBody = await json(patchResponse);
+
+    expect(patchResponse.status).toBe(200);
+    expect(patchBody.company).toMatchObject({
+      contact: '王小姐',
+      phone: '02-1234-5678',
+    });
   });
 
   it('updates company brand asset keys', async () => {

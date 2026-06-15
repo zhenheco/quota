@@ -55,6 +55,7 @@ export function companyPatchFromForm(data: FormData): CompanyPatch {
     tax_id: stringValue(data.get('tax_id')) ?? '',
     address: stringValue(data.get('address')),
     phone: stringValue(data.get('phone')),
+    contact: stringValue(data.get('contact')),
     bank_info: stringValue(data.get('bank_info')),
     default_tax_rate: numberValue(stringValue(data.get('default_tax_rate'))),
     default_notes: stringValue(data.get('default_notes')),

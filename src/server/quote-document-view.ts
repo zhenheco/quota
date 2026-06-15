@@ -1,4 +1,5 @@
 import { computeTotals } from '../shared/calc';
+import { formatMoney, formatQuantity } from '../shared/quote-document-template';
 import type { Company, Quote } from './types';
 
 interface QuoteDocumentViewInput {
@@ -16,10 +17,11 @@ export interface QuoteDocumentItemView {
 }
 
 export interface QuoteDocumentView {
-  sheetClass: 'quotation-sheet';
+  sheetClass: 'quote-sheet';
   companyName: string;
   companyAddress: string;
   companyPhone: string;
+  companyContact: string;
   companyTaxId: string;
   quoteNo: string;
   subject: string;
@@ -43,10 +45,11 @@ export function createQuoteDocumentView({ quote, company }: QuoteDocumentViewInp
   const totals = computeTotals(quote.items, quote.tax_rate);
 
   return {
-    sheetClass: 'quotation-sheet',
+    sheetClass: 'quote-sheet',
     companyName: fallback(company.name, '公司名稱'),
     companyAddress: fallback(company.address, ''),
     companyPhone: fallback(company.phone, ''),
+    companyContact: fallback(company.contact, ''),
     companyTaxId: fallback(company.tax_id, ''),
     quoteNo: quote.quote_no,
     subject: fallback(quote.subject, '報價單'),
@@ -72,16 +75,6 @@ export function createQuoteDocumentView({ quote, company }: QuoteDocumentViewInp
     notes: fallback(quote.notes, company.default_notes ?? ''),
     bankInfo: fallback(company.bank_info, ''),
   };
-}
-
-export function formatMoney(value: number): string {
-  return new Intl.NumberFormat('zh-TW', {
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
-function formatQuantity(value: number): string {
-  return Number.isInteger(value) ? String(value) : String(Math.round(value * 100) / 100);
 }
 
 function fallback(value: string | null | undefined, replacement: string): string {

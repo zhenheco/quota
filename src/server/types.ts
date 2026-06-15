@@ -18,6 +18,7 @@ export interface Company {
   tax_id: string;
   address: string | null;
   phone: string | null;
+  contact: string | null;
   bank_info: string | null;
   default_tax_rate: number;
   default_notes: string | null;

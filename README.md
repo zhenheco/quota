@@ -28,7 +28,7 @@ pnpm build
 For local development, create the local D1 schema before opening pages that read the database:
 
 ```sh
-pnpm wrangler d1 migrations apply quota-dev --local
+pnpm wrangler d1 migrations apply quota --local
 pnpm dev
 ```
 

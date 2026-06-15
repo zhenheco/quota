@@ -41,8 +41,8 @@ export function companyRepo(db: D1Database) {
       await db
         .prepare(
           `UPDATE company_profile
-           SET name = ?1, tax_id = ?2, address = ?3, phone = ?4, bank_info = ?5, default_tax_rate = ?6,
-               default_notes = ?7, logo_key = ?8, stamp_key = ?9, bank_image_key = ?10
+           SET name = ?1, tax_id = ?2, address = ?3, phone = ?4, contact = ?5, bank_info = ?6, default_tax_rate = ?7,
+               default_notes = ?8, logo_key = ?9, stamp_key = ?10, bank_image_key = ?11
            WHERE id = 1`
         )
         .bind(
@@ -50,6 +50,7 @@ export function companyRepo(db: D1Database) {
           patch.tax_id ?? current.tax_id,
           patch.address ?? current.address,
           patch.phone ?? current.phone,
+          patch.contact ?? current.contact,
           patch.bank_info ?? current.bank_info,
           patch.default_tax_rate ?? current.default_tax_rate,
           patch.default_notes ?? current.default_notes,

@@ -9,7 +9,7 @@ async function resetDb(): Promise<void> {
     env.DB.prepare('DELETE FROM clients'),
     env.DB.prepare(
       `UPDATE company_profile
-       SET name = '', tax_id = '', address = '', phone = '', bank_info = '', default_tax_rate = 0.05,
+       SET name = '', tax_id = '', address = '', phone = '', contact = '', bank_info = '', default_tax_rate = 0.05,
            default_notes = '', logo_key = NULL, stamp_key = NULL, bank_image_key = NULL
        WHERE id = 1`
     ),
@@ -30,6 +30,7 @@ describe('companyRepo', () => {
       tax_id: '',
       address: '',
       phone: '',
+      contact: '',
       bank_info: '',
       default_tax_rate: 0.05,
       default_notes: '',
@@ -48,6 +49,7 @@ describe('companyRepo', () => {
       name: '範例客戶',
       tax_id: '24536806',
       phone: '02-1234-5678',
+      contact: '',
       default_tax_rate: 0.1,
       default_notes: 'Valid for 14 days.',
     });

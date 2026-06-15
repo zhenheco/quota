@@ -16,7 +16,7 @@ async function resetDb(): Promise<void> {
     env.DB.prepare(
       `UPDATE company_profile
        SET name = '範例客戶', tax_id = '24536806', address = '台北市中山區南京東路一段 1 號',
-           phone = '02-1234-5678',
+           phone = '02-1234-5678', contact = '王小姐',
            bank_info = '玉山銀行 808 / 1234-567-890123 / 範例客戶有限公司',
            default_tax_rate = 0.05, default_notes = '匯款後請提供末五碼。',
            logo_key = NULL, stamp_key = NULL, bank_image_key = NULL
