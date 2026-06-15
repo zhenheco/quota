@@ -2,6 +2,7 @@ declare namespace Cloudflare {
   interface Env {
     DB: D1Database;
     FILES: R2Bucket;
+    BROWSER?: { fetch: typeof fetch };
     QUOTA_API_TOKEN?: string;
     UI_USER?: string;
     UI_PASSWORD?: string;

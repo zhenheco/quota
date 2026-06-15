@@ -332,6 +332,14 @@ export function quotesRepo(db: D1Database) {
 
       return requireRow(await get(id), 'Updated quote is missing.');
     },
+    async updatePdfKey(id: number, pdfKey: string): Promise<Quote> {
+      await db
+        .prepare('UPDATE quotes SET pdf_key = ?1, updated_at = ?2 WHERE id = ?3')
+        .bind(pdfKey, new Date().toISOString(), id)
+        .run();
+
+      return requireRow(await get(id), 'Updated quote is missing.');
+    },
     async updateStatus(id: number, status: QuoteStatus): Promise<Quote> {
       await db
         .prepare('UPDATE quotes SET status = ?1, updated_at = ?2 WHERE id = ?3')

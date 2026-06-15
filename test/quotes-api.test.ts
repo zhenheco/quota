@@ -177,11 +177,20 @@ describe('quotes API routes', () => {
       items: [expect.objectContaining({ name: '專案管理', amount: 8000 })],
     });
 
+    const pdfKey = `quotes/${created.quote_no}/${created.quote_no}.pdf`;
+    await env.FILES.put(pdfKey, new Uint8Array([1, 2, 3]), {
+      httpMetadata: {
+        contentType: 'application/pdf',
+      },
+    });
+    await env.DB.prepare('UPDATE quotes SET pdf_key = ?1 WHERE id = ?2').bind(pdfKey, id).run();
+
     const deleteResponse = await deleteQuote(
       context(`/api/quotes/${id}`, { method: 'DELETE', headers: authHeaders() }, { id })
     );
     expect(deleteResponse.status).toBe(204);
     await expect(env.FILES.get(`quotes/${created.quote_no}/${created.quote_no}.xlsx`)).resolves.toBeNull();
+    await expect(env.FILES.get(pdfKey)).resolves.toBeNull();
 
     const missingResponse = await getQuote(context(`/api/quotes/${id}`, { headers: authHeaders() }, { id }));
     expect(missingResponse.status).toBe(404);

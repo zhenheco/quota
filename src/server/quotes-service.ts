@@ -1,10 +1,13 @@
 import { getBrandAsset } from './brand';
 import { companyRepo, quotesRepo } from './db';
+import { generateQuotePdf, type QuotePdfEnv } from './quote-pdf';
+import { buildQuoteHtml } from './quote-pdf-html';
 import { generateQuoteXlsx } from './quote-xlsx';
 import type { Quote, QuoteListFilter, QuoteStatus } from './types';
 import { ValidationError, type ValidQuoteInput } from './validation';
 
 const XLSX_CONTENT_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const PDF_CONTENT_TYPE = 'application/pdf';
 const COMPANY_PROFILE_REQUIRED_MESSAGE =
   '請先在設定頁填寫公司名稱再建立報價單。(Set your company name in Settings before creating a quote.)';
 
@@ -20,10 +23,17 @@ export interface QuoteXlsxDownload {
   filename: string;
 }
 
+export interface QuotePdfDownload {
+  bytes: Uint8Array;
+  filename: string;
+}
+
 interface QuotesEnv {
   DB: D1Database;
   FILES: R2Bucket;
 }
+
+type QuotesPdfEnv = QuotesEnv & Partial<QuotePdfEnv>;
 
 export async function listQuotes(env: QuotesEnv, filter: QuoteListFilter = {}): Promise<Quote[]> {
   return quotesRepo(env.DB).list(filter);
@@ -87,6 +97,10 @@ export async function deleteQuote(env: QuotesEnv, id: number): Promise<boolean> 
     await env.FILES.delete(existing.xlsx_key);
   }
 
+  if (existing.pdf_key !== null) {
+    await env.FILES.delete(existing.pdf_key);
+  }
+
   await quotesRepo(env.DB).delete(id);
 
   return true;
@@ -120,6 +134,45 @@ export async function getQuoteXlsx(env: QuotesEnv, id: number): Promise<QuoteXls
   return {
     bytes: new Uint8Array(await object.arrayBuffer()),
     filename: quoteDownloadFilename(quote),
+  };
+}
+
+export async function generateQuotePdfDownload(env: QuotesPdfEnv, id: number): Promise<QuotePdfDownload | null> {
+  const quote = await quotesRepo(env.DB).get(id);
+
+  if (quote === null) {
+    return null;
+  }
+
+  const company = await companyRepo(env.DB).get();
+  const html = buildQuoteHtml({
+    quote,
+    company,
+    brand: {
+      logo: company.logo_key ? await getBrandAsset(env, company.logo_key) : null,
+      stamp: company.stamp_key ? await getBrandAsset(env, company.stamp_key) : null,
+      bank: company.bank_image_key ? await getBrandAsset(env, company.bank_image_key) : null,
+    },
+  });
+
+  if (env.BROWSER === undefined) {
+    throw new Error('Browser Rendering binding BROWSER is not configured.');
+  }
+
+  const bytes = await generateQuotePdf({ BROWSER: env.BROWSER }, html);
+  const key = quotePdfKey(quote);
+
+  await env.FILES.put(key, bytes, {
+    httpMetadata: {
+      contentType: PDF_CONTENT_TYPE,
+    },
+  });
+
+  await quotesRepo(env.DB).updatePdfKey(quote.id, key);
+
+  return {
+    bytes,
+    filename: quoteDownloadFilename(quote, 'pdf'),
   };
 }
 
@@ -175,8 +228,12 @@ function quoteXlsxKey(quote: Quote): string {
   return `quotes/${quote.quote_no}/${quote.quote_no}.xlsx`;
 }
 
-function quoteDownloadFilename(quote: Quote): string {
-  return `${filenamePart(quote.quote_date)}_${filenamePart(quote.client_name)}_${filenamePart(quote.subject)}_報價單.xlsx`;
+function quotePdfKey(quote: Quote): string {
+  return `quotes/${quote.quote_no}/${quote.quote_no}.pdf`;
+}
+
+function quoteDownloadFilename(quote: Quote, extension = 'xlsx'): string {
+  return `${filenamePart(quote.quote_date)}_${filenamePart(quote.client_name)}_${filenamePart(quote.subject)}_報價單.${extension}`;
 }
 
 function filenamePart(value: string | null): string {
@@ -185,4 +242,4 @@ function filenamePart(value: string | null): string {
   return normalized === '' ? 'quote' : normalized;
 }
 
-export { XLSX_CONTENT_TYPE };
+export { PDF_CONTENT_TYPE, XLSX_CONTENT_TYPE };

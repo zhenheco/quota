@@ -25,6 +25,9 @@ migrations_dir = "migrations"
 binding = "FILES"
 bucket_name = "quota-files"
 
+[browser]
+binding = "BROWSER"
+
 [[kv_namespaces]]
 binding = "SESSION"
 id = "db327ea7a9734fceac91aa806125a3ba"
