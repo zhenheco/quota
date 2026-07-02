@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "NODE_OPTIONS=--max-old-space-size=4096 astro check && astro build",
+    "build": "NODE_OPTIONS=--max-old-space-size=4096 astro check && astro build && node scripts/patch-worker-entry.mjs",
     "test": "vitest run",
     "lint": "NODE_OPTIONS=--max-old-space-size=4096 astro check",
     "seed-brand": "node scripts/seed-brand.mjs"
@@ -13,12 +13,14 @@
   "dependencies": {
     "@astrojs/cloudflare": "^13.7.0",
     "@cloudflare/puppeteer": "^1.1.0",
+    "@sentry/cloudflare": "^10.63.0",
     "astro": "^6.4.6"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
     "@cloudflare/vitest-pool-workers": "^0.16.15",
     "@cloudflare/workers-types": "^4.20260613.1",
+    "esbuild": "^0.28.1",
     "exceljs": "^4.4.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.8",
