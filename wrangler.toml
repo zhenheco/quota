@@ -7,13 +7,17 @@ workers_dev = false
 # `wrangler deploy -c dist/server/wrangler.json`). This root config supplies the
 # bindings the adapter merges in. Binding names are stable: DB (D1), FILES (R2), SESSION (KV).
 #
-# SELF-HOSTERS: replace the placeholder ids below with your own:
+# SELF-HOSTERS: replace the production resource ids below with your own:
 #   wrangler d1 create quota                  -> database_id
 #   wrangler kv namespace create quota-session -> SESSION id
 #   wrangler r2 bucket create quota-files      (bucket name can stay "quota-files")
 # Resource ids are not secrets, but they point at a specific account. See DEPLOY.md.
 compatibility_date = "2026-06-12"
 compatibility_flags = ["nodejs_compat"]
+
+[vars]
+SENTRY_ENVIRONMENT = "production"
+SENTRY_TRACES_SAMPLE_RATE = "0.1"
 
 [assets]
 binding = "ASSETS"
@@ -22,7 +26,7 @@ directory = "./dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "quota"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "43fb8040-cca2-4da4-b9bf-e456a6755922"
 migrations_dir = "migrations"
 
 [[r2_buckets]]
@@ -34,4 +38,4 @@ binding = "BROWSER"
 
 [[kv_namespaces]]
 binding = "SESSION"
-id = "REPLACE_WITH_YOUR_SESSION_KV_ID"
+id = "db327ea7a9734fceac91aa806125a3ba"
