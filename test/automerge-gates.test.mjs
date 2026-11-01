@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import diffReviewScript from '../.github/scripts/diff_review.py?raw';
-import diffReviewWorkflow from '../.github/workflows/diff-review.yml?raw';
 import qaGateWorkflow from '../.github/workflows/qa-gate.yml?raw';
+
+// Tests run in workerd (no real fs), so enumerate files via Vite globs.
+const workflows = import.meta.glob('../.github/workflows/*.yml', { query: '?raw', import: 'default', eager: true });
+const scripts = import.meta.glob('../.github/scripts/*', { query: '?raw', import: 'default', eager: true });
 
 describe('agent automerge gates', () => {
   it('publishes an automerge-gate workflow over the repo test/build contract', () => {
@@ -21,14 +23,11 @@ describe('agent automerge gates', () => {
     );
   });
 
-  it('publishes a fail-closed diff-review verdict status for target PRs', () => {
-    expect(diffReviewWorkflow).toContain('pull_request_target:');
-    expect(diffReviewWorkflow).toContain('statuses: write');
-    expect(diffReviewWorkflow).toContain('context=diff-review-verdict');
-    expect(diffReviewWorkflow).toContain('gh pr diff "$PR_NUMBER"');
-    expect(diffReviewWorkflow).toContain('python3 .github/scripts/diff_review.py review');
-    expect(diffReviewScript).toContain('def review_diff(');
-    expect(diffReviewScript).toContain('return "fail"');
-    expect(diffReviewScript).toContain('redact_secrets');
+  it('has no API-based diff-review workflow and no workflow uses its API keys', () => {
+    expect(Object.keys(workflows).filter((path) => path.includes('diff-review'))).toEqual([]);
+    expect(Object.keys(scripts).filter((path) => path.includes('diff_review'))).toEqual([]);
+    for (const [path, text] of Object.entries(workflows)) {
+      expect(text, path).not.toMatch(/DEEPSEEK_API_KEY|GEMINI_API_KEY/);
+    }
   });
 });
